@@ -1,6 +1,5 @@
 import asyncio
 import os
-from asyncio import WindowsSelectorEventLoopPolicy
 
 import betterlogging as logging
 from aiogram import Bot, Dispatcher, executor, types
@@ -120,5 +119,7 @@ async def get_category_menu(amount: int) -> types.InlineKeyboardMarkup:
 
 if __name__ == '__main__':
     if os.name == 'nt':
+        from asyncio import WindowsSelectorEventLoopPolicy
         asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+        
     executor.start_polling(dp, on_startup=on_start)
