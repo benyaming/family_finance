@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-RUN curl -sSL https://install.python-poetry.org | python -
+RUN pip install poetry
 WORKDIR /home/app
 COPY . .
 WORKDIR /home/app/bus_bot
