@@ -1,11 +1,16 @@
 import asyncio
 import os
+import re
+from typing import List
 
 import betterlogging as logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
+from aiogram.dispatcher.filters import RegexpCommandsFilter
 from psycopg import AsyncConnection
 
 
@@ -46,25 +51,112 @@ async def on_start(_):
     Misc.db_conn = session
 
 
-# ---------------------------- CREATE GLOVBALS ---------------------------------
+# -------------------------------- STATES -------------------------------------
+class RenameCategoryState(StatesGroup):
+    waiting_for_new_name = State()
+
+
+class AddCategoryState(StatesGroup):
+    waiting_for_new_name = State()
+
+
+# ---------------------------- CREATE GLOBALS ---------------------------------
 
 logging.basic_colorized_config(level=logging.INFO)
 bot = Bot(token=env.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(FilterMiddleware())
 
-# ---------------------------- HANDLERS ----------------------------------------
+
+# --------------------------------- UTILS --------------------------------------
+def compose_categories(categories: List[Category]) -> str:
+    categories_lines = []
+    for category in categories:
+        line = f'<b>{category.name}</b>\n' \
+               f'Переименовать: /rename_category_{category.id}'
+        categories_lines.append(line)
+    category_str = '\n-----------------------------------------------\n'.join(categories_lines)
+    resp = f'Управление категориями:\n\n' \
+           f'{category_str}\n' \
+           f'-----------------------------------------------\n' \
+           f'Добавить категорию: /new_category'
+    return resp
+
+# ------------------------------- HANDLERS -------------------------------------
 
 
 @dp.message_handler(commands=['start'])
-async def cmd_start(message: types.Message):
-    await message.answer('Добро пожаловать!\nВвод трат в формате:\n\n{сумма}')
+async def cmd_start(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.answer('Добро пожаловать!', reply_markup=main_kb)
+
+
+@dp.message_handler(text='Отмена', state='*')
+async def handle_cancel(msg: types.Message, state: FSMContext):
+    await state.finish()
+    await msg.answer('Отменено', reply_markup=main_kb)
 
 
 # @dp.message_handler(commands=['t'])
 # async def t(m: types.Message):
 #     kb = await get_category_menu()
 #     await m.answer('test', reply_markup=kb)
+
+
+@dp.message_handler(text_startswith='Категории')
+async def handle_categories_menu(msg: types.Message, state: FSMContext):
+    categories = await db.get_categories()
+    resp = compose_categories(categories)
+    sent_msg = await msg.answer(resp)
+
+    await state.update_data({'last_categories_message': sent_msg.message_id})
+
+
+@dp.message_handler(RegexpCommandsFilter(regexp_commands=[r'rename_category_([0-9]*)']))
+async def handle_rename_category(msg: types.Message, regexp_command: re.Match, state: FSMContext):
+    category_id = regexp_command.group(1)
+    await state.update_data({'category_id': category_id})
+    await RenameCategoryState.waiting_for_new_name.set()
+    await msg.answer('Введите новое имя категории:', reply_markup=cancel_kb)
+
+
+@dp.message_handler(RegexpCommandsFilter(regexp_commands=[r'new_category']))
+async def handle_new_category(msg: types.Message):
+    await AddCategoryState.waiting_for_new_name.set()
+    await msg.answer('Введите имя новой категории:', reply_markup=cancel_kb)
+
+
+@dp.message_handler(state=RenameCategoryState.waiting_for_new_name)
+async def handle_new_category_name(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    category_id = data['category_id']
+    msg_id = data.get('last_categories_message')
+
+    new_name = msg.text
+    await db.rename_category(category_id, new_name)
+    await state.finish()
+    await msg.answer('Категория переименована!', reply_markup=main_kb)
+
+    if msg_id:
+        categories = await db.get_categories()
+        resp = compose_categories(categories)
+        await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
+
+
+@dp.message_handler(state=AddCategoryState.waiting_for_new_name)
+async def handle_new_category_name(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get('last_categories_message')
+
+    new_name = msg.text
+    await db.save_category(new_name)
+    await state.finish()
+    await msg.answer('Категория добавлена!', reply_markup=main_kb)
+
+    if msg_id:
+        categories = await db.get_categories()
+        resp = compose_categories(categories)
+        await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
@@ -95,10 +187,11 @@ async def handle_transaction(call: types.CallbackQuery):
 # -------------------------------------------------------------------------------- #
 
 
-def get_main_kb():
-    kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-    kb.add('Добавить трату', 'Управление категориями')
-    return kb
+main_kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+main_kb.add('Категории', 'Подписки (скоро)')
+
+cancel_kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+cancel_kb.add('Отмена')
 
 
 async def get_category_menu(amount: int) -> types.InlineKeyboardMarkup:
@@ -109,11 +202,6 @@ async def get_category_menu(amount: int) -> types.InlineKeyboardMarkup:
             text=category.name,
             callback_data=f'{CallbackPrefixes.select_amount}{category.id}:{amount}'
         ))
-    kb.add(types.InlineKeyboardButton(
-        text='➕ Добавить категорию',
-        callback_data=f'{CallbackPrefixes.new_category}{amount}'
-    ))
-
     return kb
 
 
