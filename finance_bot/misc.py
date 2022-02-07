@@ -1,14 +1,10 @@
-from psycopg import AsyncConnection
+from aiogram import Bot, Dispatcher, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from finance_bot.settings import env
+from finance_bot.middleware import SequrityMiddleware
 
 
-class SingletonMeta(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonMeta, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class Misc(metaclass=SingletonMeta):
-    db_conn: AsyncConnection = None
+bot = Bot(token=env.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+dp = Dispatcher(bot, storage=MemoryStorage())
+dp.middleware.setup(SequrityMiddleware())

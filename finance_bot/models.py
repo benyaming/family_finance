@@ -9,6 +9,12 @@ from pydantic import BaseModel, Field
 class Category(BaseModel):
     id: Optional[int]
     name: str
+    group_id: int
+
+
+class CategoryGroup(BaseModel):
+    id: Optional[int]
+    name: str
 
 
 class Transaction(BaseModel):
