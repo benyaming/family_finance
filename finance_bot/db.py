@@ -18,11 +18,20 @@ async def get_top_categories(limit: int = 10) -> List[Category]:
     JOIN category ca ON t.category_id = ca.id
     GROUP BY ca.id
     ORDER BY COUNT(t.id) DESC
-    LIMIT :s
+    LIMIT %s
     '''
     resp = []
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query, (limit,)):
+            resp.append(Category(id=row[0], name=row[1], group_id=row[2]))
+    return resp
+
+
+async def get_categories_for_group(group_id: int) -> List[Category]:
+    resp = []
+    query = 'SELECT * FROM category WHERE group_id = %s ORDER BY id'
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query, (group_id,)):
             resp.append(Category(id=row[0], name=row[1], group_id=row[2]))
     return resp
 
@@ -53,8 +62,11 @@ async def save_category_group(group_name: str):
 
 async def get_category_groups() -> List[CategoryGroup]:
     resp = []
+    query = 'SELECT DISTINCT cg.* FROM category_group cg ' \
+            'INNER JOIN category c ON c.group_id = cg.id ' \
+            'ORDER BY cg.id'
     async with dp['db_conn'].cursor() as acur:
-        async for row in await acur.execute('SELECT * FROM category_group ORDER BY id'):
+        async for row in await acur.execute(query):
             resp.append(CategoryGroup(id=row[0], name=row[1]))
     return resp
 
