@@ -19,13 +19,15 @@ async def init_transaction(message: Message):
 
 
 async def init_category_group_selection(call: CallbackQuery):
+    await call.answer()
     amount = int(call.data.split(':')[1])
     groups = await db.get_category_groups()
-    kb = keyboards.get_category_group_options(groups, amount)
+    kb = keyboards.get_category_group_options_for_transaction(groups, amount)
     await bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=kb)
 
 
 async def init_category_selection(call: CallbackQuery):
+    await call.answer()
     group_id, amount = call.data.split(':')[1:]
     categories = await db.get_categories_for_group(group_id)
     kb = keyboards.get_category_options(categories, amount)
@@ -33,6 +35,7 @@ async def init_category_selection(call: CallbackQuery):
 
 
 async def create_transaction(call: CallbackQuery):
+    await call.answer()
     category_id, amount = call.data.split(':')[1:]
     category = await db.get_category(category_id)
     transaction = Transaction(amount=amount, category_id=category_id)

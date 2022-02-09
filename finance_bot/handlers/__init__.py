@@ -16,17 +16,19 @@ def register_handlers():
     dp.register_message_handler(service.handle_cancel, text=texts.button_cancel, state='*')
 
     # Categories
-    dp.register_message_handler(categories.categories_menu, text=texts.button_categories)
-    dp.register_message_handler(categories.categories_menu, commands=['categories'])
+    dp.register_message_handler(categories.init_category_management_selection, text=texts.button_categories)
+    dp.register_message_handler(categories.init_category_management_selection, commands=['categories'])
     dp.register_message_handler(categories.rename_category, RegexpCommandsFilter(regexp_commands=[r'rename_category_([0-9]*)']))
-    dp.register_message_handler(categories.new_category, RegexpCommandsFilter(regexp_commands=[r'new_category']))
-    dp.register_message_handler(categories.rename_category, state=states.RenameCategoryState.waiting_for_new_name)
+    dp.register_message_handler(categories.new_category, RegexpCommandsFilter(regexp_commands=[r'new_category_([0-9]*)']))
+    dp.register_message_handler(categories.update_category_name, state=states.RenameCategoryState.waiting_for_new_name)
     dp.register_message_handler(categories.add_category_name, state=states.AddCategoryState.waiting_for_new_name)
+    dp.register_callback_query_handler(categories.prepare_category_management_menu, text_startswith=CallbackPrefixes.management_categories_for_groups_requested)
 
     # Category groups
 
     # Transactions
     dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)
-    dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.category_groups_requested)
-    dp.register_callback_query_handler(transactions.init_category_selection , text_startswith=CallbackPrefixes.categories_requested)
-    dp.register_callback_query_handler(transactions.create_transaction, text_startswith=CallbackPrefixes.category_selected)
+    dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.transaction_category_groups_requested)
+    dp.register_callback_query_handler(transactions.init_category_selection, text_startswith=CallbackPrefixes.transaction_categories_requested)
+    dp.register_callback_query_handler(transactions.create_transaction, text_startswith=CallbackPrefixes.transaction_category_selected)
+

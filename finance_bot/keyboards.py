@@ -21,21 +21,34 @@ async def get_top_category_options(amount: int) -> InlineKeyboardMarkup:
     for category in categories:
         kb.add(InlineKeyboardButton(
             text=category.name,
-            callback_data=f'{CallbackPrefixes.category_selected}{category.id}:{amount}'
+            callback_data=f'{CallbackPrefixes.transaction_category_selected}{category.id}:{amount}'
         ))
     kb.add(InlineKeyboardButton(
         text=texts.button_other,
-        callback_data=f'{CallbackPrefixes.category_groups_requested}{amount}'
+        callback_data=f'{CallbackPrefixes.transaction_category_groups_requested}{amount}'
     ))
     return kb
 
 
-def get_category_group_options(groups: List[CategoryGroup], amount: int) -> InlineKeyboardMarkup:
+def get_category_group_options_for_transaction(
+        groups: List[CategoryGroup],
+        amount: int
+) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     for group in groups:
         kb.add(InlineKeyboardButton(
             text=group.name,
-            callback_data=f'{CallbackPrefixes.categories_requested}{group.id}:{amount}'
+            callback_data=f'{CallbackPrefixes.transaction_categories_requested}{group.id}:{amount}'
+        ))
+    return kb
+
+
+def get_category_group_options_for_management(groups: List[CategoryGroup]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    for group in groups:
+        kb.add(InlineKeyboardButton(
+            text=group.name,
+            callback_data=f'{CallbackPrefixes.management_categories_for_groups_requested}:{group.id}'
         ))
     return kb
 
@@ -45,10 +58,10 @@ def get_category_options(categories: List[Category], amount: int) -> InlineKeybo
     for category in categories:
         kb.add(InlineKeyboardButton(
             text=category.name,
-            callback_data=f'{CallbackPrefixes.category_selected}{category.id}:{amount}'
+            callback_data=f'{CallbackPrefixes.transaction_category_selected}{category.id}:{amount}'
         ))
     kb.add(InlineKeyboardButton(
         text=texts.button_back_to_category_groups,
-        callback_data=f'{CallbackPrefixes.category_groups_requested}{amount}'
+        callback_data=f'{CallbackPrefixes.transaction_category_groups_requested}{amount}'
     ))
     return kb

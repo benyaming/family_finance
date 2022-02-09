@@ -37,10 +37,10 @@ async def get_categories_for_group(group_id: int) -> List[Category]:
 
 
 async def get_category(category_id: int) -> Category:
-    resp = None
     async with dp['db_conn'].cursor() as acur:
-        async for row in await acur.execute('SELECT * FROM category WHERE id = %s', (category_id,)):
-            resp = Category(id=row[0], name=row[1], group_id=row[2])
+        await acur.execute('SELECT * FROM category WHERE id = %s', (category_id,))
+        row = await acur.fetchone()
+    resp = Category(id=row[0], name=row[1], group_id=row[2])
     return resp
 
 
@@ -68,6 +68,14 @@ async def get_category_groups() -> List[CategoryGroup]:
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query):
             resp.append(CategoryGroup(id=row[0], name=row[1]))
+    return resp
+
+
+async def get_category_group(group_id: int) -> CategoryGroup:
+    async with dp['db_conn'].cursor() as acur:
+        await acur.execute('SELECT * FROM category_group WHERE id = %s', (group_id,))
+        row = await acur.fetchone()
+    resp = CategoryGroup(id=row[0], name=row[1])
     return resp
 
 
