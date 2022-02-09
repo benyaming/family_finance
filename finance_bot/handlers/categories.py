@@ -10,7 +10,7 @@ from finance_bot.misc import bot
 from finance_bot import keyboards
 from finance_bot.models import Category, CategoryGroup
 from finance_bot.texts import StorageKeys
-from finance_bot.states import RenameCategoryState, AddCategoryState
+from finance_bot.states import RenameCategoryState, AddCategoryState, AddGroupState
 
 
 def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
@@ -29,7 +29,7 @@ def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
 
 
 async def init_category_management_selection(msg: Message):
-    category_groups = await db.get_category_groups()
+    category_groups = await db.get_category_groups(with_empty=True)
     kb = keyboards.get_category_group_options_for_management(category_groups)
     await msg.reply(texts.message_select_category_group_for_manage, reply_markup=kb)
 
@@ -60,6 +60,13 @@ async def new_category(msg: Message, regexp_command: re.Match, state: FSMContext
     await msg.answer('Введите имя новой категории:', reply_markup=keyboards.cancel_kb)
 
 
+async def add_new_group(call: CallbackQuery, state: FSMContext):
+    await call.answer()
+    await AddGroupState.waiting_for_new_name.set()
+    await bot.send_message(call.from_user.id, texts.message_input_new_group_name, reply_markup=keyboards.cancel_kb)
+    await state.update_data({StorageKeys.last_groups_menu_msg_id: call.message.message_id})
+
+
 async def add_category_name(msg: Message, state: FSMContext):
     data = await state.get_data()
     group_id = data['group_id']
@@ -69,13 +76,27 @@ async def add_category_name(msg: Message, state: FSMContext):
     new_name = msg.text
     await db.save_category(new_name, group_id)
     await state.reset_state(with_data=False)
-    await msg.answer(f'Категория добавлена в группу {group.name}!', reply_markup=keyboards.main_kb)
+    await msg.answer(f'Категория добавлена в группу {group.name}!')
 
     if group_id in storage_data.keys():
         msg_id = storage_data[group_id]
         categories = await db.get_categories_for_group(group.id)
         resp = compose_categories(group, categories)
         await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
+
+
+async def add_group_name(msg: Message, state: FSMContext):
+    new_name = msg.text
+    await db.save_category_group(new_name)
+    await msg.answer('Группа добавлена!')
+    await state.reset_state(with_data=False)
+
+    data = await state.get_data()
+    if StorageKeys.last_groups_menu_msg_id in data.keys():
+        msg_id = data[StorageKeys.last_groups_menu_msg_id]
+        groups = await db.get_category_groups(with_empty=True)
+        kb = keyboards.get_category_group_options_for_management(groups)
+        await bot.edit_message_reply_markup(chat_id=msg.chat.id, message_id=msg_id, reply_markup=kb)
 
 
 async def update_category_name(msg: Message, state: FSMContext):
@@ -87,7 +108,7 @@ async def update_category_name(msg: Message, state: FSMContext):
     new_name = msg.text
     await db.rename_category(category_id, new_name)
     await state.reset_state(with_data=False)
-    await msg.answer('Категория переименована!', reply_markup=keyboards.main_kb)
+    await msg.answer('Категория переименована!')
 
     if category.group_id in storage_data.keys():
         msg_id = storage_data[category.group_id]

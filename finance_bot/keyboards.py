@@ -8,9 +8,6 @@ from finance_bot import texts
 from finance_bot.models import Category, CategoryGroup
 
 
-main_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-main_kb.add(texts.button_categories, texts.button_subscriptions)
-
 cancel_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 cancel_kb.add(texts.button_cancel)
 
@@ -50,6 +47,10 @@ def get_category_group_options_for_management(groups: List[CategoryGroup]) -> In
             text=group.name,
             callback_data=f'{CallbackPrefixes.management_categories_for_groups_requested}:{group.id}'
         ))
+    kb.add(InlineKeyboardButton(
+        text=texts.button_add_group,
+        callback_data=CallbackPrefixes.management_groups_add_new_group
+    ))
     return kb
 
 

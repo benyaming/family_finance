@@ -60,11 +60,14 @@ async def save_category_group(group_name: str):
     await dp['db_conn'].commit()
 
 
-async def get_category_groups() -> List[CategoryGroup]:
+async def get_category_groups(with_empty: bool = False) -> List[CategoryGroup]:
     resp = []
-    query = 'SELECT DISTINCT cg.* FROM category_group cg ' \
-            'INNER JOIN category c ON c.group_id = cg.id ' \
-            'ORDER BY cg.id'
+    if not with_empty:
+        query = 'SELECT DISTINCT cg.* FROM category_group cg ' \
+                'INNER JOIN category c ON c.group_id = cg.id ' \
+                'ORDER BY cg.id'
+    else:
+        query = 'SELECT * FROM category_group ORDER BY id'
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query):
             resp.append(CategoryGroup(id=row[0], name=row[1]))

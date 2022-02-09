@@ -29,3 +29,10 @@ if __name__ == '__main__':
 
     register_handlers()
     executor.start_polling(dp, on_startup=on_start)
+
+
+# todo: add groups rename
+# todo: move texts to texts
+# todo: add exceptions for db constraints
+# todo: allow to remove empty groups
+# todo: transactions management
