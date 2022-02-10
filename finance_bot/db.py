@@ -50,8 +50,13 @@ async def save_category(category_name: str, group_id: int):
     await dp['db_conn'].commit()
 
 
-async def rename_category(category_id: int, new_name: str):
-    await dp['db_conn'].execute('UPDATE category SET name = %s WHERE id = %s', (new_name, category_id))
+async def update_category(category: Category):
+    query = '''
+    UPDATE category
+    SET name = %s, group_id = %s
+    WHERE id = %s
+    '''
+    await dp['db_conn'].execute(query, (category.name, category.group_id, category.id))
     await dp['db_conn'].commit()
 
 

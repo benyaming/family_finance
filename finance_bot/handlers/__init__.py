@@ -15,21 +15,24 @@ def register_handlers():
     dp.register_message_handler(service.handle_cancel, text=texts.button_cancel, state='*')
 
     # Categories
-    dp.register_message_handler(categories.init_category_management_selection, text=texts.button_categories)
-    dp.register_message_handler(categories.init_category_management_selection, commands=['categories'])
-    dp.register_message_handler(categories.rename_category, RegexpCommandsFilter(regexp_commands=[r'rename_category_([0-9]*)']))
-    dp.register_message_handler(categories.new_category, RegexpCommandsFilter(regexp_commands=[r'new_category_([0-9]*)']))
+    dp.register_message_handler(categories.prepare_groups_selection_menu, commands=['categories'], state='*')
+    dp.register_message_handler(categories.rename_category, RegexpCommandsFilter(regexp_commands=[r'rename_cat_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.rename_group, RegexpCommandsFilter(regexp_commands=[r'rename_group_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.new_category, RegexpCommandsFilter(regexp_commands=[r'new_cat_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.prepare_change_group_menu, RegexpCommandsFilter(regexp_commands=[r'move_cat_([0-9]*)']), state='*')
+
+    dp.register_message_handler(categories.prepare_groups_selection_menu, text=texts.button_categories)
     dp.register_message_handler(categories.update_category_name, state=states.RenameCategoryState.waiting_for_new_name)
+    dp.register_message_handler(categories.update_group_name, state=states.RenameGroupState.waiting_for_new_name)
     dp.register_message_handler(categories.add_category_name, state=states.AddCategoryState.waiting_for_new_name)
     dp.register_message_handler(categories.add_group_name, state=states.AddGroupState.waiting_for_new_name)
+
     dp.register_callback_query_handler(categories.prepare_category_management_menu, text_startswith=CallbackPrefixes.management_categories_for_groups_requested)
     dp.register_callback_query_handler(categories.add_new_group, text_startswith=CallbackPrefixes.management_groups_add_new_group)
-
-    # Category groups
+    dp.register_callback_query_handler(categories.change_group_for_category, text_startswith=CallbackPrefixes.management_categories_move_to_another_group)
 
     # Transactions
     dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)
     dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.transaction_category_groups_requested)
     dp.register_callback_query_handler(transactions.init_category_selection, text_startswith=CallbackPrefixes.transaction_categories_requested)
     dp.register_callback_query_handler(transactions.create_transaction, text_startswith=CallbackPrefixes.transaction_category_selected)
-

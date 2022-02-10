@@ -7,8 +7,9 @@ class CallbackPrefixes:
     transaction_category_selected = '2:'
 
     management_categories_for_groups_requested = '3:'
+    management_categories_move_to_another_group = '4:'
 
-    management_groups_add_new_group = '4:'
+    management_groups_add_new_group = '5:'
 
     new_category = 'q:'
     cancel = 'z:'
@@ -17,6 +18,7 @@ class CallbackPrefixes:
 class StorageKeys:
     last_category_msg_id = 'last_category_management_message:'
     last_groups_menu_msg_id = 'last_groups_menu_msg_id'
+    last_select_group_menu_to_delete_msg_id = 'last_select_group_menu_to_delete_msg_id'
 
 
 commands = [
@@ -37,3 +39,5 @@ button_cancel = 'Отмена'
 
 message_select_category_group_for_manage = 'Выберите группу категорий для управления:'
 message_input_new_group_name = 'Введите название новой группы категорий:'
+message_select_group_to_change = 'Выберите, в какую группу перенести категорию <b>{}</b>'
+message_category_moved_success = 'Категория <b>{}</b> перенесена в группу <b>{}</b>'

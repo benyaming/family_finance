@@ -54,6 +54,16 @@ def get_category_group_options_for_management(groups: List[CategoryGroup]) -> In
     return kb
 
 
+def get_category_group_options_for_move_category(groups: List[CategoryGroup]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    for group in groups:
+        kb.add(InlineKeyboardButton(
+            text=group.name,
+            callback_data=f'{CallbackPrefixes.management_categories_move_to_another_group}{group.id}'
+        ))
+    return kb
+
+
 def get_category_options(categories: List[Category], amount: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     for category in categories:
