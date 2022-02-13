@@ -1,5 +1,7 @@
 from typing import List
 
+import psycopg.errors
+
 from finance_bot.models import Transaction, Category, Subscription, CategoryGroup
 from finance_bot.misc import dp
 
@@ -46,8 +48,12 @@ async def get_category(category_id: int) -> Category:
 
 async def save_category(category_name: str, group_id: int):
     query = 'INSERT INTO category (name, group_id) VALUES (%s, %s)'
-    await dp['db_conn'].execute(query, (category_name, group_id))
-    await dp['db_conn'].commit()
+    try:
+        await dp['db_conn'].execute(query, (category_name, group_id))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
 
 
 async def update_category(category: Category):
@@ -56,13 +62,22 @@ async def update_category(category: Category):
     SET name = %s, group_id = %s
     WHERE id = %s
     '''
-    await dp['db_conn'].execute(query, (category.name, category.group_id, category.id))
-    await dp['db_conn'].commit()
+
+    try:
+        await dp['db_conn'].execute(query, (category.name, category.group_id, category.id))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
 
 
 async def save_category_group(group_name: str):
-    await dp['db_conn'].execute('INSERT INTO category_group (name) VALUES (%s)', (group_name,))
-    await dp['db_conn'].commit()
+    try:
+        await dp['db_conn'].execute('INSERT INTO category_group (name) VALUES (%s)', (group_name,))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
 
 
 async def get_category_groups(with_empty: bool = False) -> List[CategoryGroup]:
@@ -88,8 +103,13 @@ async def get_category_group(group_id: int) -> CategoryGroup:
 
 
 async def rename_category_group(group_id: int, new_name: str):
-    await dp['db_conn'].execute('UPDATE category_group SET name = %s WHERE id = %s', (new_name, group_id))
-    await dp['db_conn'].commit()
+    query = 'UPDATE category_group SET name = %s WHERE id = %s'
+    try:
+        await dp['db_conn'].execute(query, (new_name, group_id))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
 
 
 async def get_transactions() -> List[Subscription]:
@@ -108,13 +128,20 @@ async def get_transactions() -> List[Subscription]:
 
 async def save_transaction(transaction: Transaction):
     query = 'INSERT INTO transaction (amount, category_id, created_at) VALUES (%s, %s, %s)'
-    await dp['db_conn'].execute(query, (transaction.amount, transaction.category_id, transaction.created_at))
-    await dp['db_conn'].commit()
+    try:
+        await dp['db_conn'].execute(query, (transaction.amount, transaction.category_id, transaction.created_at))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
 
 
 async def save_subscription(subscription: Subscription):
-    await dp['db_conn'].execute(
-        'INSERT INTO subscription (name, amount, day_of_month, category_id) VALUES (%s, %s, %s, %s)',
-        (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id)
-    )
-    await dp['db_conn'].commit()
+    query = 'INSERT INTO subscription (name, amount, day_of_month, category_id) VALUES (%s, %s, %s, %s)'
+    args = (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id)
+    try:
+        await dp['db_conn'].execute(query, args)
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise

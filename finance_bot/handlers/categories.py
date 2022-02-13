@@ -1,8 +1,10 @@
 import re
 from typing import List
 
+import psycopg.errors
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import MessageNotModified
 
 from finance_bot import db
 from finance_bot import texts
@@ -108,9 +110,13 @@ async def add_category_name(msg: Message, state: FSMContext):
     group_id = data['group_id']
     group = await db.get_category_group(group_id)
     storage_data = data.get(StorageKeys.last_category_msg_id, {})
-
     new_name = msg.text
-    await db.save_category(new_name, group_id)
+
+    try:
+        await db.save_category(new_name, group_id)
+    except psycopg.errors.UniqueViolation:
+        return await msg.reply(texts.msg_category_already_exists)
+
     await state.reset_state(with_data=False)
     await msg.answer(texts.msg_category_add_success.format(new_name, group.name), reply_markup=ReplyKeyboardRemove())
 
@@ -123,7 +129,11 @@ async def add_category_name(msg: Message, state: FSMContext):
 
 async def add_group_name(msg: Message, state: FSMContext):
     new_name = msg.text
-    await db.save_category_group(new_name)
+    try:
+        await db.save_category_group(new_name)
+    except psycopg.errors.UniqueViolation:
+        return await msg.answer(texts.msg_group_name_already_exists)
+
     await msg.answer(texts.msg_group_add_success.format(new_name), reply_markup=ReplyKeyboardRemove())
     await state.reset_state(with_data=False)
 
@@ -154,7 +164,10 @@ async def update_category_name(msg: Message, state: FSMContext):
         group = await db.get_category_group(category.group_id)
         categories = await db.get_categories_for_group(group.id)
         resp = compose_categories(group, categories)
-        await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
+        try:
+            await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
+        except MessageNotModified:
+            pass
 
 
 async def update_group_name(msg: Message, state: FSMContext):
@@ -173,7 +186,10 @@ async def update_group_name(msg: Message, state: FSMContext):
         msg_id = data[StorageKeys.last_groups_menu_msg_id]
         groups = await db.get_category_groups(with_empty=True)
         kb = keyboards.get_category_group_options_for_management(groups)
-        await bot.edit_message_reply_markup(chat_id=msg.chat.id, message_id=msg_id, reply_markup=kb)
+        try:
+            await bot.edit_message_reply_markup(chat_id=msg.chat.id, message_id=msg_id, reply_markup=kb)
+        except MessageNotModified:
+            pass
 
 
 async def change_group_for_category(call: CallbackQuery, state: FSMContext):
