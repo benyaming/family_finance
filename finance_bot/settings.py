@@ -13,6 +13,7 @@ class Env(BaseSettings):
     ADMITTED_USERS: List[int] = Field(..., env='ADMITTED_USERS')
 
     AMOUNT_PRECISION: int = Field(10_000, env='AMOUNT_PRECISION')
+    CATEGORY_SUGGESTION_AMOUNT: int = Field(5, env='CATEGORY_SUGGESTION_AMOUNT')
 
 
 env = Env()

@@ -2,8 +2,9 @@ from typing import List
 
 import psycopg.errors
 
-from finance_bot.models import Transaction, Category, Subscription, CategoryGroup
 from finance_bot.misc import dp
+from finance_bot.settings import env
+from finance_bot.models import Transaction, Category, Subscription, CategoryGroup
 
 
 async def get_all_categories() -> List[Category]:
@@ -14,7 +15,7 @@ async def get_all_categories() -> List[Category]:
     return resp
 
 
-async def get_top_categories(limit: int = 10) -> List[Category]:
+async def get_top_categories(limit: int = env.CATEGORY_SUGGESTION_AMOUNT) -> List[Category]:
     query = '''
     SELECT ca.* from transaction t
     JOIN category ca ON t.category_id = ca.id
