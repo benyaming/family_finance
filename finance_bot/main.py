@@ -31,7 +31,6 @@ if __name__ == '__main__':
     executor.start_polling(dp, on_startup=on_start)
 
 
-# todo: move texts to texts
 # todo: add exceptions for db constraints
 # todo: allow to remove empty groups
 # todo: transactions management
