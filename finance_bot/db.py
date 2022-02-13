@@ -112,6 +112,16 @@ async def rename_category_group(group_id: int, new_name: str):
         raise
 
 
+async def remove_category_group(group_id: int):
+    query = 'DELETE FROM category_group WHERE id = %s'
+    try:
+        await dp['db_conn'].execute(query, (group_id,))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
 async def get_transactions() -> List[Subscription]:
     resp = []
     async with dp['db_conn'].cursor() as acur:

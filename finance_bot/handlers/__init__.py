@@ -20,6 +20,7 @@ def register_handlers():
     dp.register_message_handler(categories.rename_group, RegexpCommandsFilter(regexp_commands=[r'rename_group_([0-9]*)']), state='*')
     dp.register_message_handler(categories.new_category, RegexpCommandsFilter(regexp_commands=[r'new_cat_([0-9]*)']), state='*')
     dp.register_message_handler(categories.prepare_change_group_menu, RegexpCommandsFilter(regexp_commands=[r'move_cat_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.remove_group, RegexpCommandsFilter(regexp_commands=[r'remove_group_([0-9]*)']), state='*')
 
     dp.register_message_handler(categories.prepare_groups_selection_menu, text=texts.button_categories)
     dp.register_message_handler(categories.update_category_name, state=states.RenameCategoryState.waiting_for_new_name)
