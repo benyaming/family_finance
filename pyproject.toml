@@ -12,6 +12,8 @@ psycopg = {extras = ["binary"],version = '*'}
 pydantic = {extras = ["dotenv"],version = '*'}
 sqlmodel = '*'
 betterlogging = '*'
+apscheduler = '*'
+tzlocal = '^2'
 
 [tool.poetry.dev-dependencies]
 

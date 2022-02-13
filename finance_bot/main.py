@@ -5,9 +5,9 @@ import betterlogging as logging
 from aiogram import Dispatcher, executor
 from psycopg import AsyncConnection
 
-
+from finance_bot.periodic_jobs.reminder import remind_to_input_spends
 from finance_bot.settings import env
-from finance_bot.misc import dp, bot
+from finance_bot.misc import dp, bot, scheduler, reminder_trigger
 from finance_bot.texts import commands
 from finance_bot.handlers import register_handlers
 
@@ -28,4 +28,6 @@ if __name__ == '__main__':
         asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
     register_handlers()
+    scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+    scheduler.start()
     executor.start_polling(dp, on_startup=on_start)
