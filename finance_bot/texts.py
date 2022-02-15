@@ -16,7 +16,8 @@ class CallbackPrefixes:
 
 
 class StorageKeys:
-    last_category_msg_id = 'last_category_management_message:'
+    last_category_msg_id = 'last_category_management_message'
+    last_subscription_menu_msg_id = 'last_subscription_menu_msg_id'
     last_groups_menu_msg_id = 'last_groups_menu_msg_id'
     last_select_group_menu_to_delete_msg_id = 'last_select_group_menu_to_delete_msg_id'
     category_id = 'category_id'
@@ -62,12 +63,18 @@ msg_category_already_exists = 'Категория с таким название
 msg_cannot_remove_group_with_categories = 'Невозможно удалить группу с созданными категориями!'
 msg_group_not_found = 'Группа не найдена!'
 msg_input_spends_remind = 'Не забудьте ввести свои сегодняшние траты!'
+msg_no_subscriptions_found = 'Не найдено ни одной подписки!\nДобавить подписку: /new_sub'
 
 cat_manage_title = 'Управление категориями группы'
 cat_manage_add_cat = 'Добавить категорию'
 cat_manage_edit_cat = 'Изменить имя категории'
 cat_manage_move_cat = 'Перенести в другую группу'
 cat_manage_group_is_empty = 'В этой группе пока нет категорий, ее можно безопасно удалить:'
+
+sub_manage_title = 'Управление подписками'
+sub_manage_remove = 'Удалить подписку:'
+sub_manage_add_new = 'Добавить новую подписку:'
+sub_manage_date = 'Следующее списание:'
 
 transaction_manage_title = 'Трата успешно добавлена!'
 transaction_manage_summ = 'Сумма:'

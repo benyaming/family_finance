@@ -123,20 +123,6 @@ async def remove_category_group(group_id: int):
         raise
 
 
-async def get_transactions() -> List[Subscription]:
-    resp = []
-    async with dp['db_conn'].cursor() as acur:
-        async for row in await acur.execute('SELECT * FROM subscription'):
-            resp.append(Subscription(
-                id=row[0],
-                name=row[1],
-                amount=row[2],
-                day_of_month=row[3],
-                category_id=row[4],
-            ))
-    return resp
-
-
 async def save_transaction(transaction: Transaction):
     query = 'INSERT INTO transaction (amount, category_id, created_at) VALUES (%s, %s, %s)'
     try:
@@ -147,9 +133,42 @@ async def save_transaction(transaction: Transaction):
         raise
 
 
+async def get_subscriptions() -> List[Subscription]:
+    resp = []
+    query = '''
+    SELECT s.*, c.name, cg.name FROM subscription s
+    JOIN category c on s.category_id = c.id
+    JOIN category_group cg on c.group_id = cg.id
+    ORDER BY s.id
+    '''
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query):
+            resp.append(Subscription(
+                id=row[0],
+                name=row[1],
+                amount=row[2],
+                day_of_month=row[3],
+                category_id=row[4],
+                category_name=row[5],
+                group_name=row[6],
+            ))
+    return resp
+
+
 async def save_subscription(subscription: Subscription):
     query = 'INSERT INTO subscription (name, amount, day_of_month, category_id) VALUES (%s, %s, %s, %s)'
     args = (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id)
+    try:
+        await dp['db_conn'].execute(query, args)
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
+async def update_subscription(subscription: Subscription):
+    query = 'UPDATE subscription SET name = %s, amount = %s, day_of_month = %s, category_id = %s WHERE id = %s'
+    args = (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id, subscription.id)
     try:
         await dp['db_conn'].execute(query, args)
         await dp['db_conn'].commit()
