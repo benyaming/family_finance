@@ -35,6 +35,7 @@ def register_handlers():
 
     # Subscriptions
     dp.register_message_handler(subscriptions.prepare_subscription_management_menu, commands=['subscriptions'])
+    dp.register_message_handler(subscriptions.init_new_subscription, commands=['add_subscription'])
 
     # Transactions
     dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)  # <-- should be last

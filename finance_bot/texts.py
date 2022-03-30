@@ -24,6 +24,10 @@ class StorageKeys:
     category_to_move_id = 'category_to_move_id'
     group_id = 'group_id'
 
+    new_sub_name = 'new_sub_name'
+    new_sub_amount = 'new_sub_amount'
+    new_sub_day = 'new_sub_day'
+
 
 commands = [
     BotCommand('start', 'Перезагрузить'),
@@ -64,6 +68,11 @@ msg_cannot_remove_group_with_categories = 'Невозможно удалить �
 msg_group_not_found = 'Группа не найдена!'
 msg_input_spends_remind = 'Не забудьте ввести свои сегодняшние траты!'
 msg_no_subscriptions_found = 'Не найдено ни одной подписки!\nДобавить подписку: /new_sub'
+msg_new_sub_input_name = 'Введите название новой подписки:'
+msg_new_sub_input_amount = 'Введите сумму, которая будет списываться каждый месяц:'
+msg_new_sub_input_day = 'В какое число месяца списывать эту сумму?'
+msg_new_sub_input_category = 'Выберите категорию для подписки:'
+msg_new_sub_success = 'Подписка {} успещно сохранена.'
 
 cat_manage_title = 'Управление категориями группы'
 cat_manage_add_cat = 'Добавить категорию'
@@ -82,6 +91,9 @@ transaction_manage_category = 'Категория:'
 transaction_manage_group = 'Группа категорий:'
 transaction_manage_date = 'Дата:'
 
+new_sub_manage_name = 'Название:'
+new_sub_manage_amount = 'Сумма:'
+new_sub_manage_day = 'Число месяца:'
 
 group_manage_edit_name = 'Изменить имя группы'
 
