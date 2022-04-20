@@ -70,7 +70,7 @@ def get_plot(values: List[int], labels: List[str], month_name: str, year: int) -
     )
 
     fig.update_traces(
-        marker={'line': {'color': '#000000', 'width': 2}}
+        marker={'line': {'color': '#000000', 'width': 4}}
     )
 
     fig.update_layout(
