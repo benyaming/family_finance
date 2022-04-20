@@ -28,6 +28,7 @@ commands = [
     BotCommand('start', 'Перезагрузить'),
     BotCommand('categories', 'Управление категориями'),
     BotCommand('subscriptions', 'Управление подписками'),
+    BotCommand('stats', 'Статистика за текущий месяц')
 ]
 
 
@@ -75,6 +76,24 @@ transaction_manage_category = 'Категория:'
 transaction_manage_group = 'Группа категорий:'
 transaction_manage_date = 'Дата:'
 
-
 group_manage_edit_name = 'Изменить имя группы'
+
+
+msg_cant_parse_stats_args = 'Не удалось распознать аргументы. Можно отправить номер месяца и/или год.'
+msg_no_stats_for_month = 'За этот месяц не найдено трат!'
+
+month_names = {
+    1: 'Январь',
+    2: 'Февраль',
+    3: 'Март',
+    4: 'Апрель',
+    5: 'Май',
+    6: 'Июнь',
+    7: 'Июль',
+    8: 'Август',
+    9: 'Сентябрь',
+    10: 'Октябрь',
+    11: 'Ноябрь',
+    12: 'Декабрь',
+}
 
