@@ -76,3 +76,18 @@ def get_category_options(categories: List[Category], amount: int) -> InlineKeybo
         callback_data=f'{CallbackPrefixes.transaction_category_groups_requested}{amount}'
     ))
     return kb
+
+
+def get_detailed_stats_kb(
+        group_ids: List[int],
+        group_names: List[str],
+        month: int,
+        year: int
+) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    for group_id, group_name in zip(group_ids, group_names):
+        kb.add(InlineKeyboardButton(
+            text=f'{texts.stats_details_button_prefix}{group_name}',
+            callback_data=f'{CallbackPrefixes.detailed_stats_for_group_requested}{group_id}:{month}:{year}'
+        ))
+    return kb

@@ -1,10 +1,15 @@
-from typing import List
+from typing import List, Tuple
 
 import psycopg.errors
 
 from finance_bot.misc import dp
 from finance_bot.settings import env
-from finance_bot.models import Transaction, Category, Subscription, CategoryGroup
+from finance_bot.models import (
+    Transaction,
+    Category,
+    Subscription,
+    CategoryGroup
+)
 
 
 async def get_all_categories() -> List[Category]:
@@ -156,3 +161,59 @@ async def save_subscription(subscription: Subscription):
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()
         raise
+
+
+async def get_group_stats_for_month(month: int, year: int) -> Tuple[List[str], List[int], List[int]]:
+    query = '''
+    SELECT 
+          cg.id,
+          cg.name,
+          (sum(amount) / 10000)::INT AS total
+    FROM transaction t
+    JOIN category c ON c.id = t.category_id
+    JOIN category_group cg ON cg.id = c.group_id
+    WHERE 
+        date_part('month', t.created_at::TIMESTAMP) = %s AND
+        date_part('year', t.created_at::TIMESTAMP) = %s
+    GROUP BY cg.name, cg.id
+    ORDER BY total DESC
+    '''
+    names = []
+    amounts = []
+    group_ids = []
+
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query, (month, year)):
+            group_ids.append(row[0])
+            names.append(row[1])
+            amounts.append(row[2])
+    return names, amounts, group_ids
+
+
+async def get_category_stats_for_month(
+        group_id: int,
+        month: int,
+        year: int
+) -> Tuple[List[str], List[int]]:
+    query = '''
+    SELECT 
+          c.name,
+          (sum(amount) / 10000)::INT AS total
+    FROM transaction t
+    JOIN category c ON c.id = t.category_id
+    JOIN category_group cg ON cg.id = c.group_id
+    WHERE 
+        cg.id = %s AND
+        date_part('month', t.created_at::TIMESTAMP) = %s AND
+        date_part('year', t.created_at::TIMESTAMP) = %s
+    GROUP BY c.name
+    ORDER BY total DESC
+    '''
+    names = []
+    amounts = []
+
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query, (group_id, month, year)):
+            names.append(row[0])
+            amounts.append(row[1])
+    return names, amounts
