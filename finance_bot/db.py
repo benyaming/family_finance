@@ -163,9 +163,10 @@ async def save_subscription(subscription: Subscription):
         raise
 
 
-async def get_stats_for_month(month: int, year: int) -> Tuple[List[str], List[int]]:
+async def get_group_stats_for_month(month: int, year: int) -> Tuple[List[str], List[int], List[int]]:
     query = '''
     SELECT 
+          cg.id,
           cg.name,
           (sum(amount) / 10000)::INT AS total
     FROM transaction t
@@ -174,13 +175,45 @@ async def get_stats_for_month(month: int, year: int) -> Tuple[List[str], List[in
     WHERE 
         date_part('month', t.created_at::TIMESTAMP) = %s AND
         date_part('year', t.created_at::TIMESTAMP) = %s
-    GROUP BY cg.name
+    GROUP BY cg.name, cg.id
     ORDER BY total DESC
     '''
     names = []
     amounts = []
+    group_ids = []
+
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query, (month, year)):
+            group_ids.append(row[0])
+            names.append(row[1])
+            amounts.append(row[2])
+    return names, amounts, group_ids
+
+
+async def get_category_stats_for_month(
+        group_id: int,
+        month: int,
+        year: int
+) -> Tuple[List[str], List[int]]:
+    query = '''
+    SELECT 
+          c.name,
+          (sum(amount) / 10000)::INT AS total
+    FROM transaction t
+    JOIN category c ON c.id = t.category_id
+    JOIN category_group cg ON cg.id = c.group_id
+    WHERE 
+        cg.id = %s AND
+        date_part('month', t.created_at::TIMESTAMP) = %s AND
+        date_part('year', t.created_at::TIMESTAMP) = %s
+    GROUP BY c.name
+    ORDER BY total DESC
+    '''
+    names = []
+    amounts = []
+
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query, (group_id, month, year)):
             names.append(row[0])
             amounts.append(row[1])
     return names, amounts

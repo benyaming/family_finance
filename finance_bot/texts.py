@@ -11,6 +11,8 @@ class CallbackPrefixes:
 
     management_groups_add_new_group = '5:'
 
+    detailed_stats_for_group_requested = '6:'
+
     new_category = 'q:'
     cancel = 'z:'
 
@@ -78,9 +80,12 @@ transaction_manage_date = 'Дата:'
 
 group_manage_edit_name = 'Изменить имя группы'
 
+plot_spends_title = 'Траты за'
+plot_in_category = 'в категории'
 
 msg_cant_parse_stats_args = 'Не удалось распознать аргументы. Можно отправить номер месяца и/или год.'
 msg_no_stats_for_month = 'За этот месяц не найдено трат!'
+stats_details_button_prefix = 'Подробнее: '
 
 month_names = {
     1: 'Январь',

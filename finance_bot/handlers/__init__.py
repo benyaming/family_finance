@@ -39,7 +39,8 @@ def register_handlers():
     dp.register_callback_query_handler(transactions.create_transaction, text_startswith=CallbackPrefixes.transaction_category_selected)
 
     # Stats
-    dp.register_message_handler(stats.stats_for_month, commands=['stats'], state='*')
+    dp.register_message_handler(stats.group_stats_for_month, commands=['stats'], state='*')
+    dp.register_callback_query_handler(stats.category_stats_for_month, text_startswith=CallbackPrefixes.detailed_stats_for_group_requested, state='*')
 
     # This should be the last one
     dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)
