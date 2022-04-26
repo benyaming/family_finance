@@ -34,6 +34,9 @@ if __name__ == '__main__':
         asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
     register_handlers()
-    scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+
+    if env.IS_REMINDER_ENABLED:
+        scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+
     scheduler.start()
     executor.start_polling(dp, on_startup=on_start)

@@ -17,5 +17,9 @@ class Env(BaseSettings):
 
     CURRENCY_CHAR: str = Field(..., env='CURRENCY_CHAR')
 
+    IS_REMINDER_ENABLED: bool = Field(True, env='IS_REMINDER_ENABLED')
+    REMINDER_HOUR: int = Field(21, env='REMINDER_HOUR', ge=0, lt=24)
+    REMINDER_MINUTE: int = Field(0, env='REMINDER_MINUTE', ge=0, lt=60)
+
 
 env = Env()
