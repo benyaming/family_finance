@@ -9,6 +9,7 @@ from finance_bot import db
 from finance_bot import texts
 from finance_bot.misc import bot
 from finance_bot.keyboards import get_detailed_stats_kb
+from finance_bot.settings import env
 
 
 def parse_stats_args(command: str) -> Tuple[int, int]:
@@ -46,7 +47,7 @@ def get_plot(
         textfont={
             'size': 50,
         },
-        texttemplate='%{label}<br>%{value:,}₪'
+        texttemplate=f'%{{label}}<br>%{{value:,}}{env.CURRENCY_CHAR}'
     )
     trace2 = go.Pie(
         **common_props,
@@ -62,7 +63,7 @@ def get_plot(
     fig.add_annotation(
         x=0.5,
         y=0.5,
-        text=f'{sum(values):,}₪'.replace(',', '.'),
+        text=f'{sum(values):,}{env.CURRENCY_CHAR}'.replace(',', '.'),
         font={
             'size': 70,
             'family': 'Verdana',

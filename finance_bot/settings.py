@@ -15,5 +15,7 @@ class Env(BaseSettings):
     AMOUNT_PRECISION: int = Field(10_000, env='AMOUNT_PRECISION')
     CATEGORY_SUGGESTION_AMOUNT: int = Field(5, env='CATEGORY_SUGGESTION_AMOUNT')
 
+    CURRENCY_CHAR: str = Field(..., env='CURRENCY_CHAR')
+
 
 env = Env()
