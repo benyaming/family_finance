@@ -52,7 +52,11 @@ Use them to define mandatory settings and for some customization
 | ----------- |---------------------|:------------:|--------|
 | `BOT_TOKEN`      | Telegram bot token. Obtain it via [BotFather](https://t.me/BotFather) | Yes | 12345:qwerty |
 | `DB_DSN`    | [Postgres connection string](https://www.postgresql.org/docs/current/libpq-connect.html#id-1.7.3.8.3.5) | Yes | "host=localhost port=5432 user=postgres password=postgres dbname=finance_bot"
-| `ADMITTED_USERS` | Users that allowed to use the bot. Format is string with JSON array of integers | Yes | "[12345, 67890]"
+| `ADMITTED_USERS` | Users that allowed to use the bot. Format is string with JSON array of integers | Yes | "[12345, 67890]" |
+| `CURRENCY_CHAR` | Currency symbol. | Yes | "$" |
+| `IS_REMINDER_ENABLED` | Enable/disable daily reminder. Default value is `true` | No | true |
+| `REMINDER_HOUR` | Hour of the day when the reminder should be sent. Default value is `9` | No | 9 |
+| `REMINDER_MINUTE` | Minute of the hour when the reminder should be sent. Default value is `0` | No | 0 |
 
 <!-- USAGE -->
 ## Usage
