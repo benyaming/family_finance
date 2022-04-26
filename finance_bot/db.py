@@ -12,6 +12,48 @@ from finance_bot.models import (
 )
 
 
+async def init_db():
+    query = '''
+    -- category_group table
+    CREATE TABLE IF NOT EXISTS category_group
+    (
+        id   SERIAL CONSTRAINT category_group_pk PRIMARY KEY,
+        name TEXT NOT NULL
+    );
+    
+    CREATE UNIQUE INDEX IF NOT EXISTS category_group_id_uindex ON category_group (id);
+    CREATE UNIQUE INDEX IF NOT EXISTS category_group_name_uindex ON category_group (name);
+
+    -- category table
+    CREATE TABLE IF NOT EXISTS category
+    (
+        id       SERIAL CONSTRAINT category_pk PRIMARY KEY,
+        name     TEXT              NOT NULL,
+        group_id INTEGER DEFAULT 1 NOT NULL CONSTRAINT category_category_group_id_fk REFERENCES category_group
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS category_id_uindex ON category (id);
+    CREATE UNIQUE INDEX IF NOT EXISTS category_name_uindex ON category (name);
+
+    -- transaction table
+    CREATE TABLE IF NOT EXISTS transaction
+    (
+        id          SERIAL  CONSTRAINT transaction_pk PRIMARY KEY ,
+        amount      INTEGER                 NOT NULL,
+        category_id INTEGER                 NOT NULL CONSTRAINT transaction_category_id_fk REFERENCES category,
+        created_at  TIMESTAMP DEFAULT now() NOT NULL 
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS transaction_id_uindex ON transaction (id);
+    '''
+    try:
+        await dp['db_conn'].execute(query)
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
 async def get_all_categories() -> List[Category]:
     resp = []
     async with dp['db_conn'].cursor() as acur:

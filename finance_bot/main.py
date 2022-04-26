@@ -10,9 +10,11 @@ from finance_bot.settings import env
 from finance_bot.misc import dp, bot, scheduler, reminder_trigger
 from finance_bot.texts import commands
 from finance_bot.handlers import register_handlers
+from finance_bot.db import init_db
 
 
 logging.basic_colorized_config(level=logging.INFO)
+logger = logging.getLogger(__file__)
 
 
 async def on_start(dp_: Dispatcher):
@@ -20,6 +22,10 @@ async def on_start(dp_: Dispatcher):
     dp_['db_conn'] = db_conn
 
     await bot.set_my_commands(commands)
+
+    logger.info('Initializing database...')
+    await init_db()
+    logger.info('...Done.')
 
 
 if __name__ == '__main__':
