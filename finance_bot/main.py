@@ -10,9 +10,11 @@ from finance_bot.settings import env
 from finance_bot.misc import dp, bot, scheduler, reminder_trigger
 from finance_bot.texts import commands
 from finance_bot.handlers import register_handlers
+from finance_bot.db import init_db
 
 
 logging.basic_colorized_config(level=logging.INFO)
+logger = logging.getLogger(__file__)
 
 
 async def on_start(dp_: Dispatcher):
@@ -21,6 +23,10 @@ async def on_start(dp_: Dispatcher):
 
     await bot.set_my_commands(commands)
 
+    logger.info('Initializing database...')
+    await init_db()
+    logger.info('...Done.')
+
 
 if __name__ == '__main__':
     if os.name == 'nt':
@@ -28,6 +34,9 @@ if __name__ == '__main__':
         asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
     register_handlers()
-    scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+
+    if env.IS_REMINDER_ENABLED:
+        scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+
     scheduler.start()
     executor.start_polling(dp, on_startup=on_start)

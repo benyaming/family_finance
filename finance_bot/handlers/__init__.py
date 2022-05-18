@@ -8,6 +8,7 @@ from finance_bot.texts import CallbackPrefixes
 from finance_bot.handlers import categories
 from finance_bot.handlers import service
 from finance_bot.handlers import transactions
+from finance_bot.handlers import stats
 from finance_bot.handlers import subscriptions
 
 
@@ -38,7 +39,13 @@ def register_handlers():
     dp.register_message_handler(subscriptions.init_new_subscription, commands=['add_subscription'])
 
     # Transactions
-    dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)  # <-- should be last
     dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.transaction_category_groups_requested)
     dp.register_callback_query_handler(transactions.init_category_selection, text_startswith=CallbackPrefixes.transaction_categories_requested)
     dp.register_callback_query_handler(transactions.create_transaction, text_startswith=CallbackPrefixes.transaction_category_selected)
+
+    # Stats
+    dp.register_message_handler(stats.group_stats_for_month, commands=['stats'], state='*')
+    dp.register_callback_query_handler(stats.category_stats_for_month, text_startswith=CallbackPrefixes.detailed_stats_for_group_requested, state='*')
+
+    # This should be the last one
+    dp.register_message_handler(transactions.init_transaction, content_types=ContentType.TEXT)

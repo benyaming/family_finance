@@ -12,5 +12,4 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(SequrityMiddleware())
 
 scheduler = AsyncIOScheduler()
-subscriptions_trigger = CronTrigger(hour=20, minute=0)
-reminder_trigger = CronTrigger(hour=21, minute=00)
+reminder_trigger = CronTrigger(hour=env.REMINDER_HOUR, minute=env.REMINDER_MINUTE)

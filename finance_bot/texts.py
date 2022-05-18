@@ -11,6 +11,8 @@ class CallbackPrefixes:
 
     management_groups_add_new_group = '5:'
 
+    detailed_stats_for_group_requested = '6:'
+
     new_category = 'q:'
     cancel = 'z:'
 
@@ -31,8 +33,9 @@ class StorageKeys:
 
 commands = [
     BotCommand('start', 'Перезагрузить'),
-    BotCommand('categories', 'Управление категориями'),
-    BotCommand('subscriptions', 'Управление подписками'),
+    BotCommand('categories', 'Управление категориями и группами'),
+    # BotCommand('subscriptions', 'Управление подписками'),
+    BotCommand('stats', 'Статистика за текущий месяц')
 ]
 
 
@@ -96,4 +99,26 @@ new_sub_manage_amount = 'Сумма:'
 new_sub_manage_day = 'Число месяца:'
 
 group_manage_edit_name = 'Изменить имя группы'
+
+plot_spends_title = 'Траты за'
+plot_in_category = 'в категории'
+
+msg_cant_parse_stats_args = 'Не удалось распознать аргументы. Можно отправить номер месяца и/или год.'
+msg_no_stats_for_month = 'За этот месяц не найдено трат!'
+stats_details_button_prefix = 'Подробнее: '
+
+month_names = {
+    1: 'Январь',
+    2: 'Февраль',
+    3: 'Март',
+    4: 'Апрель',
+    5: 'Май',
+    6: 'Июнь',
+    7: 'Июль',
+    8: 'Август',
+    9: 'Сентябрь',
+    10: 'Октябрь',
+    11: 'Ноябрь',
+    12: 'Декабрь',
+}
 
