@@ -27,78 +27,78 @@ class StorageKeys:
 
 
 commands = [
-    BotCommand('start', 'Перезагрузить'),
-    BotCommand('categories', 'Управление категориями и группами'),
+    BotCommand('start', 'restart'),
+    BotCommand('categories', 'Category and group management'),
     # BotCommand('subscriptions', 'Управление подписками'),
-    BotCommand('stats', 'Статистика за текущий месяц')
+    BotCommand('stats', 'Statistics for the current month')
 ]
 
 
-button_categories = 'Категории'
-button_other = 'Другое...'
+button_categories = 'Categories'
+button_other = 'Other...'
 
-button_add_group = '➕ Добавить группу категорий'
-button_back_to_category_groups = '🔙 Другая группа...'
-button_category_groups = 'Группы категорий'
-button_subscriptions = 'Подписки (скоро)'
-button_cancel = 'Отмена'
+button_add_group = '➕ Add category group'
+button_back_to_category_groups = '🔙 Another group...'
+button_category_groups = 'Category groups'
+button_subscriptions = 'Subscriptions (coming soon)'
+button_cancel = 'Cancel'
 
-msg_welcome = 'Добро пожаловать!'
-msg_cancel = 'Отменено.'
+msg_welcome = 'Welcome!'
+msg_cancel = 'Canceled.'
 
-msg_select_category_group_for_manage = 'Выберите группу категорий для управления:'
-msg_select_group_to_change = 'Выберите, в какую группу перенести категорию <b>{}</b>'
-msg_input_name_for_new_category = 'Введите название новой категории:'
-msg_input_name_for_new_group = 'Введите название новой группы:'
-msg_input_name_for_specific_category = 'Введите новое название категории <b>{}</b>:'
-msg_input_name_for_specific_group = 'Введите новое название группы <b>{}</b>:'
-msg_category_add_success = 'Категория <b>{}</b> добавлена в группу <b>{}</b>.'
-msg_group_add_success = 'Группа <b>{}</b> добавлена.'
-msg_category_rename_success = 'Категория <b>{}</b> переименована.'
-msg_category_move_success = 'Категория <b>{}</b> перемещена в группу <b>{}</b>.'
-msg_group_rename_success = 'Группа <b>{}</b> переименована.'
-msg_incorrect_amount = 'Неверный формат суммы'
-msg_select_cat_for_transaction = 'Сумма: {}\n\n<i>Выберите категорию:</i>'
-msg_category_group_removed = 'Группа <b>{}</b> удалена.'
-msg_group_name_already_exists = 'Группа с таким названием уже существует!'
-msg_category_already_exists = 'Категория с таким названием уже существует!'
-msg_cannot_remove_group_with_categories = 'Невозможно удалить группу с созданными категориями!'
-msg_group_not_found = 'Группа не найдена!'
-msg_input_spends_remind = 'Не забудьте ввести свои сегодняшние траты!'
+msg_select_category_group_for_manage = 'Select a category group to manage:'
+msg_select_group_to_change = 'Choose which group to transfer the category to <b>{}</b>'
+msg_input_name_for_new_category = 'Enter the name of the new category:'
+msg_input_name_for_new_group = 'Enter the name of the new group:'
+msg_input_name_for_specific_category = 'Enter a new category name <b>{}</b>:'
+msg_input_name_for_specific_group = 'Enter a new group name <b>{}</b>:'
+msg_category_add_success = 'Category <b>{}</b> added to group <b>{}</b>.'
+msg_group_add_success = 'Group <b>{}</b> added.'
+msg_category_rename_success = 'Category <b>{}</b> renamed.'
+msg_category_move_success = 'Category <b>{}</b> moved to group <b>{}</b>.'
+msg_group_rename_success = 'Group <b>{}</b> renamed.'
+msg_incorrect_amount = 'Invalid amount format!'
+msg_select_cat_for_transaction = 'Sum: {}\n\n<i>Select a category:</i>'
+msg_category_group_removed = 'Group <b>{}</b> deleted.'
+msg_group_name_already_exists = 'A group with the same name already exists!'
+msg_category_already_exists = 'A category with that name already exists!'
+msg_cannot_remove_group_with_categories = 'Unable to delete a group with created categories!'
+msg_group_not_found = 'Group not found!'
+msg_input_spends_remind = "Don't forget to enter your today's expenses!"
 
-cat_manage_title = 'Управление категориями группы'
-cat_manage_add_cat = 'Добавить категорию'
-cat_manage_edit_cat = 'Изменить имя категории'
-cat_manage_move_cat = 'Перенести в другую группу'
-cat_manage_group_is_empty = 'В этой группе пока нет категорий, ее можно безопасно удалить:'
+cat_manage_title = 'Group category management'
+cat_manage_add_cat = 'Add category'
+cat_manage_edit_cat = 'Change category name'
+cat_manage_move_cat = 'Move to another group'
+cat_manage_group_is_empty = 'There are no categories in this group yet, it can be safely deleted:'
 
-transaction_manage_title = 'Трата успешно добавлена!'
-transaction_manage_summ = 'Сумма:'
-transaction_manage_category = 'Категория:'
-transaction_manage_group = 'Группа категорий:'
-transaction_manage_date = 'Дата:'
+transaction_manage_title = 'Waste added successfully!'
+transaction_manage_summ = 'Sum:'
+transaction_manage_category = 'Category:'
+transaction_manage_group = 'Category group:'
+transaction_manage_date = 'Date:'
 
-group_manage_edit_name = 'Изменить имя группы'
+group_manage_edit_name = 'Change group name'
 
-plot_spends_title = 'Траты за'
-plot_in_category = 'в категории'
+plot_spends_title = 'Spending for'
+plot_in_category = 'in category'
 
-msg_cant_parse_stats_args = 'Не удалось распознать аргументы. Можно отправить номер месяца и/или год.'
-msg_no_stats_for_month = 'За этот месяц не найдено трат!'
-stats_details_button_prefix = 'Подробнее: '
+msg_cant_parse_stats_args = 'Failed to recognize arguments. You can send the number of the month and/or year.'
+msg_no_stats_for_month = 'No spending found this month!'
+stats_details_button_prefix = 'More: '
 
 month_names = {
-    1: 'Январь',
-    2: 'Февраль',
-    3: 'Март',
-    4: 'Апрель',
-    5: 'Май',
-    6: 'Июнь',
-    7: 'Июль',
-    8: 'Август',
-    9: 'Сентябрь',
-    10: 'Октябрь',
-    11: 'Ноябрь',
-    12: 'Декабрь',
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December',
 }
 
