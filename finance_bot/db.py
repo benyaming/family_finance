@@ -38,13 +38,27 @@ async def init_db():
     -- transaction table
     CREATE TABLE IF NOT EXISTS transaction
     (
-        id          SERIAL  CONSTRAINT transaction_pk PRIMARY KEY ,
+        id          SERIAL  CONSTRAINT transaction_pk PRIMARY KEY,
         amount      INTEGER                 NOT NULL,
         category_id INTEGER                 NOT NULL CONSTRAINT transaction_category_id_fk REFERENCES category,
         created_at  TIMESTAMP DEFAULT now() NOT NULL 
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS transaction_id_uindex ON transaction (id);
+    
+    -- subscriptions table
+    CREATE TABLE IF NOT EXISTS subscription
+    (
+        id           SERIAL   CONSTRAINT subscription_pk PRIMARY KEY,
+        name         TEXT     NOT NULL,
+        amount       INTEGER  NOT NULL,
+        day_of_month SMALLINT NOT NULL,
+        category_id  INTEGER  NOT NULL CONSTRAINT transaction_category_id_fk REFERENCES category
+    );
+    
+    CREATE UNIQUE INDEX IF NOT EXISTS subscription_id_uindex ON subscription(id);
+    CREATE UNIQUE INDEX IF NOT EXISTS subscription_name_uindex ON subscription(name);
+    
     '''
     try:
         await dp['db_conn'].execute(query)

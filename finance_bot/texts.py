@@ -13,6 +13,8 @@ class CallbackPrefixes:
 
     detailed_stats_for_group_requested = '6:'
 
+    subscription_categories_requested = '7:'
+
     new_category = 'q:'
     cancel = 'z:'
 
@@ -34,7 +36,7 @@ class StorageKeys:
 commands = [
     BotCommand('start', 'Перезагрузить'),
     BotCommand('categories', 'Управление категориями и группами'),
-    # BotCommand('subscriptions', 'Управление подписками'),
+    BotCommand('subscriptions', 'Управление подписками'),
     BotCommand('stats', 'Статистика за текущий месяц')
 ]
 
@@ -70,7 +72,7 @@ msg_category_already_exists = 'Категория с таким название
 msg_cannot_remove_group_with_categories = 'Невозможно удалить группу с созданными категориями!'
 msg_group_not_found = 'Группа не найдена!'
 msg_input_spends_remind = 'Не забудьте ввести свои сегодняшние траты!'
-msg_no_subscriptions_found = 'Не найдено ни одной подписки!\nДобавить подписку: /new_sub'
+msg_no_subscriptions_found = 'Не найдено ни одной подписки!\nДобавить подписку: /add_subscription'
 msg_new_sub_input_name = 'Введите название новой подписки:'
 msg_new_sub_input_amount = 'Введите сумму, которая будет списываться каждый месяц:'
 msg_new_sub_input_day = 'В какое число месяца списывать эту сумму?'

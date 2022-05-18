@@ -37,6 +37,9 @@ def register_handlers():
     # Subscriptions
     dp.register_message_handler(subscriptions.prepare_subscription_management_menu, commands=['subscriptions'])
     dp.register_message_handler(subscriptions.init_new_subscription, commands=['add_subscription'])
+    dp.register_message_handler(subscriptions.handle_subscription_name, state=states.AddSubscriptionState.waiting_for_name)
+    dp.register_message_handler(subscriptions.handle_subscription_day, state=states.AddSubscriptionState.waiting_for_date)
+    dp.register_message_handler(subscriptions.handle_subscription_amount, state=states.AddSubscriptionState.waiting_for_amount)
 
     # Transactions
     dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.transaction_category_groups_requested)

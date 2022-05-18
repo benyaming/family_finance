@@ -1,4 +1,3 @@
-import datetime
 from datetime import date, timedelta
 from typing import List
 
@@ -68,4 +67,19 @@ async def handle_subscription_amount(msg: Message, state: FSMContext):
 async def handle_subscription_day(msg: Message, state: FSMContext):
     await state.update_data({StorageKeys.new_sub_day: msg.text})
     await AddSubscriptionState.next()
-    await msg.reply(texts.msg_new_sub_input_category, reply_markup=)
+    groups = await db.get_category_groups()
+
+    await msg.reply(
+        texts.msg_new_sub_input_category,
+        reply_markup=keyboards.get_category_group_options_for_subscription(groups)
+    )
+
+
+# todo: transactions group navigation
+# todo: remove cancel kb in the last question
+# todo: numbers and dates validators
+# todo: save subscription
+# todo: show amount in composed menu
+# todo: subscription task execution
+# todo: cancel subscription
+# todo: crud for subscriptions

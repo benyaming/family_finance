@@ -40,6 +40,18 @@ def get_category_group_options_for_transaction(
     return kb
 
 
+def get_category_group_options_for_subscription(
+        groups: List[CategoryGroup]
+) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    for group in groups:
+        kb.add(InlineKeyboardButton(
+            text=group.name,
+            callback_data=f'{CallbackPrefixes.subscription_categories_requested}{group.id}'
+        ))
+    return kb
+
+
 def get_category_group_options_for_management(groups: List[CategoryGroup]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     for group in groups:
