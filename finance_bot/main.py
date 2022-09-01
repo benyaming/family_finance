@@ -6,8 +6,9 @@ from aiogram import Dispatcher, executor
 from psycopg import AsyncConnection
 
 from finance_bot.periodic_jobs.reminder import remind_to_input_spends
+from finance_bot.periodic_jobs.subscription_manager import process_subscriptions
 from finance_bot.settings import env
-from finance_bot.misc import dp, bot, scheduler, reminder_trigger
+from finance_bot.misc import dp, bot, scheduler, reminder_trigger, subscription_trigger
 from finance_bot.texts import commands
 from finance_bot.handlers import register_handlers
 from finance_bot.db import init_db
@@ -37,6 +38,7 @@ if __name__ == '__main__':
 
     if env.IS_REMINDER_ENABLED:
         scheduler.add_job(remind_to_input_spends, trigger=reminder_trigger)
+    scheduler.add_job(process_subscriptions, trigger=subscription_trigger)
 
     scheduler.start()
     executor.start_polling(dp, on_startup=on_start)

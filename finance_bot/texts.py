@@ -13,7 +13,17 @@ class CallbackPrefixes:
 
     detailed_stats_for_group_requested = '6:'
 
-    subscription_categories_requested = '7:'
+    subscription_category_groups_requested = '7:'
+    subscription_categories_requested = '8:'
+    subscription_category_selected = '9:'
+
+    subscription_edit_name = '10:'
+    subscription_edit_date = '11:'
+    subscription_edit_amount = '12:'
+    subscription_edit_category = '13:'
+    subscription_remove = '14:'
+
+    subscription_confirm = '15:'
 
     new_category = 'q:'
     cancel = 'z:'
@@ -85,8 +95,9 @@ cat_manage_edit_cat = 'Изменить имя категории'
 cat_manage_move_cat = 'Перенести в другую группу'
 cat_manage_group_is_empty = 'В этой группе пока нет категорий, ее можно безопасно удалить:'
 
+sub_process_title = 'Подписка'
 sub_manage_title = 'Управление подписками'
-sub_manage_remove = 'Удалить подписку:'
+sub_manage_manage = 'Управлять подпиской:'
 sub_manage_add_new = 'Добавить новую подписку:'
 sub_manage_date = 'Следующее списание:'
 
@@ -99,6 +110,21 @@ transaction_manage_date = 'Дата:'
 new_sub_manage_name = 'Название:'
 new_sub_manage_amount = 'Сумма:'
 new_sub_manage_day = 'Число месяца:'
+new_sub_manage_done = 'Подписка "{}" успешно создана.'
+
+new_sub_incorrect_amount = 'Некорректная сумма, попробуйте еще раз:'
+new_sub_incorrect_day = 'Некорректное число, попробуйте еще раз:'
+sub_deleted = 'Подписка удалена.'
+sub_not_found = 'Подписка не найдена!'
+
+sub_confirm_note = 'Нажмите на кнопку внизу, чтобы внести трату.'
+
+button_edit_sub_name = 'Изменить название'
+button_edit_sub_date = 'Изменить дату'
+button_edit_sub_amount = 'Изменить сумму'
+button_edit_sub_category = 'Изменить категорию'
+button_remove_sub = 'Удалить подписку'
+button_process_subscription = 'Внести трату'
 
 group_manage_edit_name = 'Изменить имя группы'
 

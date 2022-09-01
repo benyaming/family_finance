@@ -40,6 +40,12 @@ def register_handlers():
     dp.register_message_handler(subscriptions.handle_subscription_name, state=states.AddSubscriptionState.waiting_for_name)
     dp.register_message_handler(subscriptions.handle_subscription_day, state=states.AddSubscriptionState.waiting_for_date)
     dp.register_message_handler(subscriptions.handle_subscription_amount, state=states.AddSubscriptionState.waiting_for_amount)
+    dp.register_message_handler(subscriptions.manage_subscription_menu, RegexpCommandsFilter(regexp_commands=[r'manage_subscription_([0-9]*)']), state='*')
+    dp.register_callback_query_handler(subscriptions.init_category_selection_for_subscription, text_startswith=CallbackPrefixes.subscription_categories_requested)
+    dp.register_callback_query_handler(subscriptions.init_category_group_selection_for_subscription, text_startswith=CallbackPrefixes.subscription_category_groups_requested)
+    dp.register_callback_query_handler(subscriptions.create_subscription, text_startswith=CallbackPrefixes.subscription_category_selected)
+    dp.register_callback_query_handler(subscriptions.remove_subscription, text_startswith=CallbackPrefixes.subscription_remove)
+    dp.register_callback_query_handler(subscriptions.process_subscription, text_startswith=CallbackPrefixes.subscription_confirm)
 
     # Transactions
     dp.register_callback_query_handler(transactions.init_category_group_selection, text_startswith=CallbackPrefixes.transaction_category_groups_requested)

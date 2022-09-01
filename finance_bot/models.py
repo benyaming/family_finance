@@ -31,3 +31,4 @@ class Subscription(BaseModel):
     category_id: int
     category_name: Optional[str]
     group_name: Optional[str]
+    user_id: int

@@ -55,8 +55,10 @@ Use them to define mandatory settings and for some customization
 | `ADMITTED_USERS` | Users that allowed to use the bot. Format is string with JSON array of integers | Yes | "[12345, 67890]" |
 | `CURRENCY_CHAR` | Currency symbol. | Yes | "$" |
 | `IS_REMINDER_ENABLED` | Enable/disable daily reminder. Default value is `true` | No | true |
-| `REMINDER_HOUR` | Hour of the day when the reminder should be sent. Default value is `21` | No | 21 |
-| `REMINDER_MINUTE` | Minute of the hour when the reminder should be sent. Default value is `0` | No | 0 |
+| `REMINDER_HOUR` | Hour of the day when the reminder should be sent. | No | 21 |
+| `REMINDER_MINUTE` | Same as above for minutes | No | 0 |
+|`SUBSCRIPTION_HOUR` | Hour of the day when subscriptions should have been processed and user should receive notifications. | No | 10 |
+|`SUBSCRIPTION_MINUTE` | Same as above for minutes | No | 0 |
 
 <!-- USAGE -->
 ## Usage
