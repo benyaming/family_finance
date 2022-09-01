@@ -13,3 +13,4 @@ dp.middleware.setup(SequrityMiddleware())
 
 scheduler = AsyncIOScheduler()
 reminder_trigger = CronTrigger(hour=env.REMINDER_HOUR, minute=env.REMINDER_MINUTE)
+subscription_trigger = CronTrigger(hour=env.SUBSCRIPTION_HOUR, minute=env.SUBSCRIPTION_MINUTE)

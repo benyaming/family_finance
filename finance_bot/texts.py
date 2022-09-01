@@ -13,23 +13,40 @@ class CallbackPrefixes:
 
     detailed_stats_for_group_requested = '6:'
 
+    subscription_category_groups_requested = '7:'
+    subscription_categories_requested = '8:'
+    subscription_category_selected = '9:'
+
+    subscription_edit_name = '10:'
+    subscription_edit_date = '11:'
+    subscription_edit_amount = '12:'
+    subscription_edit_category = '13:'
+    subscription_remove = '14:'
+
+    subscription_confirm = '15:'
+
     new_category = 'q:'
     cancel = 'z:'
 
 
 class StorageKeys:
-    last_category_msg_id = 'last_category_management_message:'
+    last_category_msg_id = 'last_category_management_message'
+    last_subscription_menu_msg_id = 'last_subscription_menu_msg_id'
     last_groups_menu_msg_id = 'last_groups_menu_msg_id'
     last_select_group_menu_to_delete_msg_id = 'last_select_group_menu_to_delete_msg_id'
     category_id = 'category_id'
     category_to_move_id = 'category_to_move_id'
     group_id = 'group_id'
 
+    new_sub_name = 'new_sub_name'
+    new_sub_amount = 'new_sub_amount'
+    new_sub_day = 'new_sub_day'
+
 
 commands = [
     BotCommand('start', 'Перезагрузить'),
     BotCommand('categories', 'Управление категориями и группами'),
-    # BotCommand('subscriptions', 'Управление подписками'),
+    BotCommand('subscriptions', 'Управление подписками'),
     BotCommand('stats', 'Статистика за текущий месяц')
 ]
 
@@ -65,6 +82,12 @@ msg_category_already_exists = 'Категория с таким название
 msg_cannot_remove_group_with_categories = 'Невозможно удалить группу с созданными категориями!'
 msg_group_not_found = 'Группа не найдена!'
 msg_input_spends_remind = 'Не забудьте ввести свои сегодняшние траты!'
+msg_no_subscriptions_found = 'Не найдено ни одной подписки!\nДобавить подписку: /add_subscription'
+msg_new_sub_input_name = 'Введите название новой подписки:'
+msg_new_sub_input_amount = 'Введите сумму, которая будет списываться каждый месяц:'
+msg_new_sub_input_day = 'В какое число месяца списывать эту сумму?'
+msg_new_sub_input_category = 'Выберите категорию для подписки:'
+msg_new_sub_success = 'Подписка {} успещно сохранена.'
 
 cat_manage_title = 'Управление категориями группы'
 cat_manage_add_cat = 'Добавить категорию'
@@ -72,11 +95,36 @@ cat_manage_edit_cat = 'Изменить имя категории'
 cat_manage_move_cat = 'Перенести в другую группу'
 cat_manage_group_is_empty = 'В этой группе пока нет категорий, ее можно безопасно удалить:'
 
+sub_process_title = 'Подписка'
+sub_manage_title = 'Управление подписками'
+sub_manage_manage = 'Управлять подпиской:'
+sub_manage_add_new = 'Добавить новую подписку:'
+sub_manage_date = 'Следующее списание:'
+
 transaction_manage_title = 'Трата успешно добавлена!'
 transaction_manage_summ = 'Сумма:'
 transaction_manage_category = 'Категория:'
 transaction_manage_group = 'Группа категорий:'
 transaction_manage_date = 'Дата:'
+
+new_sub_manage_name = 'Название:'
+new_sub_manage_amount = 'Сумма:'
+new_sub_manage_day = 'Число месяца:'
+new_sub_manage_done = 'Подписка "{}" успешно создана.'
+
+new_sub_incorrect_amount = 'Некорректная сумма, попробуйте еще раз:'
+new_sub_incorrect_day = 'Некорректное число, попробуйте еще раз:'
+sub_deleted = 'Подписка удалена.'
+sub_not_found = 'Подписка не найдена!'
+
+sub_confirm_note = 'Нажмите на кнопку внизу, чтобы внести трату.'
+
+button_edit_sub_name = 'Изменить название'
+button_edit_sub_date = 'Изменить дату'
+button_edit_sub_amount = 'Изменить сумму'
+button_edit_sub_category = 'Изменить категорию'
+button_remove_sub = 'Удалить подписку'
+button_process_subscription = 'Внести трату'
 
 group_manage_edit_name = 'Изменить имя группы'
 

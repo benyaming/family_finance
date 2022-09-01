@@ -21,5 +21,8 @@ class Env(BaseSettings):
     REMINDER_HOUR: int = Field(21, env='REMINDER_HOUR', ge=0, lt=24)
     REMINDER_MINUTE: int = Field(0, env='REMINDER_MINUTE', ge=0, lt=60)
 
+    SUBSCRIPTION_HOUR: int = Field(10, env='SUBSCRIPTION_HOUR', ge=0, lt=24)
+    SUBSCRIPTION_MINUTE: int = Field(0, env='SUBSCRIPTION_MINUTE', ge=0, lt=60)
+
 
 env = Env()

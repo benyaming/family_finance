@@ -29,3 +29,6 @@ class Subscription(BaseModel):
     amount: int
     day_of_month: int = Field(..., ge=1, le=31)
     category_id: int
+    category_name: Optional[str]
+    group_name: Optional[str]
+    user_id: int

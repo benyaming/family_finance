@@ -38,13 +38,28 @@ async def init_db():
     -- transaction table
     CREATE TABLE IF NOT EXISTS transaction
     (
-        id          SERIAL  CONSTRAINT transaction_pk PRIMARY KEY ,
+        id          SERIAL  CONSTRAINT transaction_pk PRIMARY KEY,
         amount      INTEGER                 NOT NULL,
         category_id INTEGER                 NOT NULL CONSTRAINT transaction_category_id_fk REFERENCES category,
         created_at  TIMESTAMP DEFAULT now() NOT NULL 
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS transaction_id_uindex ON transaction (id);
+    
+    -- subscriptions table
+    CREATE TABLE IF NOT EXISTS subscription
+    (
+        id           SERIAL   CONSTRAINT subscription_pk PRIMARY KEY,
+        name         TEXT     NOT NULL,
+        amount       INTEGER  NOT NULL,
+        day_of_month SMALLINT NOT NULL,
+        category_id  INTEGER  NOT NULL CONSTRAINT transaction_category_id_fk REFERENCES category,
+        user_id      INTEGER  NOT NULL
+    );
+    
+    CREATE UNIQUE INDEX IF NOT EXISTS subscription_id_uindex ON subscription(id);
+    CREATE UNIQUE INDEX IF NOT EXISTS subscription_name_uindex ON subscription(name, category_id);
+    
     '''
     try:
         await dp['db_conn'].execute(query)
@@ -170,20 +185,6 @@ async def remove_category_group(group_id: int):
         raise
 
 
-async def get_transactions() -> List[Subscription]:
-    resp = []
-    async with dp['db_conn'].cursor() as acur:
-        async for row in await acur.execute('SELECT * FROM subscription'):
-            resp.append(Subscription(
-                id=row[0],
-                name=row[1],
-                amount=row[2],
-                day_of_month=row[3],
-                category_id=row[4],
-            ))
-    return resp
-
-
 async def save_transaction(transaction: Transaction):
     query = 'INSERT INTO transaction (amount, category_id, created_at) VALUES (%s, %s, %s)'
     try:
@@ -194,15 +195,118 @@ async def save_transaction(transaction: Transaction):
         raise
 
 
+async def get_subscriptions() -> List[Subscription]:
+    resp = []
+    query = '''
+    SELECT s.*, c.name, cg.name FROM subscription s
+    JOIN category c on s.category_id = c.id
+    JOIN category_group cg on c.group_id = cg.id
+    ORDER BY s.id
+    '''
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query):
+            resp.append(Subscription(
+                id=row[0],
+                name=row[1],
+                amount=row[2],
+                day_of_month=row[3],
+                category_id=row[4],
+                user_id=row[5],
+                category_name=row[6],
+                group_name=row[7]
+            ))
+    return resp
+
+
+async def get_subscription(subscription_id: int) -> Subscription:
+    query = '''
+        SELECT s.*, c.name, cg.name FROM subscription s
+        JOIN category c on s.category_id = c.id
+        JOIN category_group cg on c.group_id = cg.id
+        WHERE s.id = %s 
+        ORDER BY s.id
+        '''
+    async with dp['db_conn'].cursor() as acur:
+        row = await (await acur.execute(query, (subscription_id,))).fetchone()
+
+    if not row:
+        raise ValueError('No subscription found!')
+
+    resp = Subscription(
+        id=row[0],
+        name=row[1],
+        amount=row[2],
+        day_of_month=row[3],
+        category_id=row[4],
+        user_id=row[5],
+        category_name=row[6],
+        group_name=row[7]
+    )
+    return resp
+
+
 async def save_subscription(subscription: Subscription):
-    query = 'INSERT INTO subscription (name, amount, day_of_month, category_id) VALUES (%s, %s, %s, %s)'
-    args = (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id)
+    query = 'INSERT INTO subscription (' \
+            '    name, amount, day_of_month, category_id, user_id' \
+            ') VALUES (%s, %s, %s, %s, %s)'
+    args = (
+        subscription.name,
+        subscription.amount,
+        subscription.day_of_month,
+        subscription.category_id,
+        subscription.user_id
+    )
     try:
         await dp['db_conn'].execute(query, args)
         await dp['db_conn'].commit()
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()
         raise
+
+
+async def update_subscription(subscription: Subscription):
+    query = 'UPDATE subscription SET name = %s, amount = %s, day_of_month = %s, category_id = %s WHERE id = %s'
+    args = (subscription.name, subscription.amount, subscription.day_of_month, subscription.category_id, subscription.id)
+    try:
+        await dp['db_conn'].execute(query, args)
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
+async def remove_subscription(subscription_id: int):
+    query = 'DELETE FROM subscription WHERE id = %s'
+    try:
+        await dp['db_conn'].execute(query, (subscription_id,))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
+async def get_subscriptions_for_today() -> list[Subscription]:
+    resp = []
+    query = '''
+        SELECT s.*, c.name, cg.name FROM subscription s
+        JOIN category c on s.category_id = c.id
+        JOIN category_group cg on c.group_id = cg.id
+        WHERE s.day_of_month = EXTRACT(DAY FROM CURRENT_TIMESTAMP)
+        ORDER BY s.id
+        '''
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query):
+            resp.append(Subscription(
+                id=row[0],
+                name=row[1],
+                amount=row[2],
+                day_of_month=row[3],
+                category_id=row[4],
+                user_id=row[5],
+                category_name=row[6],
+                group_name=row[7]
+            ))
+    return resp
 
 
 async def get_group_stats_for_month(month: int, year: int) -> Tuple[List[str], List[int], List[int]]:
