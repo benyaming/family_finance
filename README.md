@@ -27,9 +27,9 @@ Also, it is only Russian language supported, but English is coming soon!
 - Multiple users support: each one can insert spendings and see shared stats
 - Stats for any month by category groups and categories
 - Daily notifications that reminds to enter spendings 
+- Subscriptions management (monthly payments with fixed amount)
 
 ### Planned
-- Subscriptions management (monthly payments with fixed amount)
 - Multi-language 
 - [Probably] multi-user support (like cloud solution, instead of self-hosted)
 
