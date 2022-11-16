@@ -47,11 +47,11 @@ class StorageKeys:
 
 
 commands = [
-    BotCommand('start', 'Перезагрузить'),
+    BotCommand('limits', 'Месячные лимиты'),
+    BotCommand('stats', 'Статистика за текущий месяц'),
     BotCommand('categories', 'Управление категориями и группами'),
     BotCommand('subscriptions', 'Управление подписками'),
-    BotCommand('stats', 'Статистика за текущий месяц'),
-    BotCommand('limits', 'Месячные лимиты')
+    BotCommand('start', 'Перезагрузить')
 ]
 
 
