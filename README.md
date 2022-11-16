@@ -67,7 +67,7 @@ After amount was sent, the bot will ask user to select category from inline keyb
 
 Also, the bot supports some commands. Here are they:
 - `/categories` — Categories and Category groups management
-- `/stats` — Pie plot for current month. Also can be used with explicit month `/stats month_number` or with explicit month and year `/stats month_number year` 
+- `/stats` — Pie plot for current month. Also, can be used with explicit month `/stats month_number` or with explicit month and year `/stats month_number year` 
 
 <!-- CONTACT -->
 ## Contact
