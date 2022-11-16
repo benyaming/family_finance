@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from typing import List
 
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 
 from finance_bot import db
 from finance_bot import texts
@@ -144,7 +144,8 @@ async def create_subscription(call: CallbackQuery, state: FSMContext):
     await bot.edit_message_text(
         text=texts.new_sub_manage_done.format(subscription_name),
         chat_id=call.from_user.id,
-        message_id=call.message.message_id
+        message_id=call.message.message_id,
+        reply_markup=ReplyKeyboardRemove()
     )
 
 
@@ -182,7 +183,7 @@ async def process_subscription(call: CallbackQuery):
     await db.save_transaction(transaction)
 
     resp = f'<i>{texts.transaction_manage_title}</i>\n\n' \
-           f'<b>{texts.transaction_manage_summ}</b> {subscription.amount}\n' \
+           f'<b>{texts.transaction_manage_summ}</b> {subscription.amount}{env.CURRENCY_CHAR}\n' \
            f'<b>{texts.transaction_manage_category}</b> {subscription.category_name}\n' \
            f'<b>{texts.transaction_manage_group}</b> {subscription.group_name}\n' \
            f'<b>{texts.transaction_manage_date}</b> {transaction.created_at.strftime("%d/%m/%Y")}'
@@ -190,7 +191,6 @@ async def process_subscription(call: CallbackQuery):
     await bot.edit_message_text(
         text=resp,
         chat_id=call.from_user.id,
-        message_id=call.message.message_id
+        message_id=call.message.message_id,
+        reply_markup=ReplyKeyboardRemove()
     )
-
-# todo: edit subscription name/date/amount/category
