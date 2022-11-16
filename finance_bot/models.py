@@ -15,6 +15,7 @@ class Category(BaseModel):
 class CategoryGroup(BaseModel):
     id: Optional[int]
     name: str
+    limit: Optional[int]
 
 
 class Transaction(BaseModel):

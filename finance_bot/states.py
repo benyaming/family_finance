@@ -15,9 +15,14 @@ class AddCategoryState(StatesGroup):
 
 class AddGroupState(StatesGroup):
     waiting_for_new_name = State()
+    waiting_for_limit = State()
 
 
 class AddSubscriptionState(StatesGroup):
     waiting_for_name = State()
     waiting_for_amount = State()
     waiting_for_date = State()
+
+
+class SetLimitState(StatesGroup):
+    waiting_for_amount = State()

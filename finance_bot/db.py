@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import psycopg.errors
 
@@ -17,8 +17,9 @@ async def init_db():
     -- category_group table
     CREATE TABLE IF NOT EXISTS category_group
     (
-        id   SERIAL CONSTRAINT category_group_pk PRIMARY KEY,
-        name TEXT NOT NULL
+        id    SERIAL CONSTRAINT category_group_pk PRIMARY KEY,
+        name  TEXT NOT NULL,
+        monthly_limit INTEGER
     );
     
     CREATE UNIQUE INDEX IF NOT EXISTS category_group_id_uindex ON category_group (id);
@@ -60,6 +61,9 @@ async def init_db():
     CREATE UNIQUE INDEX IF NOT EXISTS subscription_id_uindex ON subscription(id);
     CREATE UNIQUE INDEX IF NOT EXISTS subscription_name_uindex ON subscription(name, category_id);
     
+    
+    -- Migration: add limits
+    ALTER TABLE category_group ADD COLUMN IF NOT EXISTS monthly_limit INTEGER;
     '''
     try:
         await dp['db_conn'].execute(query)
@@ -134,9 +138,10 @@ async def update_category(category: Category):
         raise
 
 
-async def save_category_group(group_name: str):
+async def save_category_group(group_name: str, limit: int):
+    query = 'INSERT INTO category_group (name, monthly_limit) VALUES (%s, %s)'
     try:
-        await dp['db_conn'].execute('INSERT INTO category_group (name) VALUES (%s)', (group_name,))
+        await dp['db_conn'].execute(query, (group_name, limit))
         await dp['db_conn'].commit()
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()
@@ -153,7 +158,7 @@ async def get_category_groups(with_empty: bool = False) -> List[CategoryGroup]:
         query = 'SELECT * FROM category_group ORDER BY id'
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query):
-            resp.append(CategoryGroup(id=row[0], name=row[1]))
+            resp.append(CategoryGroup(id=row[0], name=row[1], limit=row[2]))
     return resp
 
 
@@ -161,7 +166,7 @@ async def get_category_group(group_id: int) -> CategoryGroup:
     async with dp['db_conn'].cursor() as acur:
         await acur.execute('SELECT * FROM category_group WHERE id = %s', (group_id,))
         row = await acur.fetchone()
-    resp = CategoryGroup(id=row[0], name=row[1])
+    resp = CategoryGroup(id=row[0], name=row[1], limit=row[2])
     return resp
 
 
@@ -169,6 +174,16 @@ async def rename_category_group(group_id: int, new_name: str):
     query = 'UPDATE category_group SET name = %s WHERE id = %s'
     try:
         await dp['db_conn'].execute(query, (new_name, group_id))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
+async def set_limit_for_category_group(group_id: int, new_limit: Optional[int]):
+    query = 'UPDATE category_group SET monthly_limit = %s WHERE id = %s'
+    try:
+        await dp['db_conn'].execute(query, (new_limit, group_id))
         await dp['db_conn'].commit()
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()

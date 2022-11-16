@@ -42,12 +42,16 @@ class StorageKeys:
     new_sub_amount = 'new_sub_amount'
     new_sub_day = 'new_sub_day'
 
+    new_limit_group_id = 'new_limit_group_id'
+    new_group_group_name = 'new_group_group_name'
+
 
 commands = [
     BotCommand('start', 'Перезагрузить'),
     BotCommand('categories', 'Управление категориями и группами'),
     BotCommand('subscriptions', 'Управление подписками'),
-    BotCommand('stats', 'Статистика за текущий месяц')
+    BotCommand('stats', 'Статистика за текущий месяц'),
+    BotCommand('limits', 'Месячные лимиты')
 ]
 
 
@@ -59,6 +63,7 @@ button_back_to_category_groups = '🔙 Другая группа...'
 button_category_groups = 'Группы категорий'
 button_subscriptions = 'Подписки (скоро)'
 button_cancel = 'Отмена'
+button_done = 'Готово'
 
 msg_welcome = 'Добро пожаловать!'
 msg_cancel = 'Отменено.'
@@ -150,3 +155,13 @@ month_names = {
     12: 'Декабрь',
 }
 
+limits_no_limit = '<i>Лимит не задан. Задать:</i> /set_limit_{}'
+limits_header = '<b>Лимит:</b> {}{}/месяц. \n' \
+                '<i>Изменить лимит:</i> /set_limit_{}\n' \
+                '<i>Удалить лимит:</i> /remove_limit_{}'
+
+limits_input_amount = 'Какой размер месячного лимита? Если хотите пропустить, нажмите "Готово".'
+limits_update_amount = 'Введите новый размер лимита для группы <b>{}</b>:'
+limits_limit_set_success = 'Лимит успешно задан!'
+limits_limit_remove_success = 'Лимит успешно удалён!'
+limits_incorrect_amount = 'Некорректное число. Введите число либо нажмите "Готово".'

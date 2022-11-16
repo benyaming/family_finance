@@ -28,11 +28,17 @@ def register_handlers():
     dp.register_message_handler(categories.update_category_name, state=states.RenameCategoryState.waiting_for_new_name)
     dp.register_message_handler(categories.update_group_name, state=states.RenameGroupState.waiting_for_new_name)
     dp.register_message_handler(categories.add_category_name, state=states.AddCategoryState.waiting_for_new_name)
-    dp.register_message_handler(categories.add_group_name, state=states.AddGroupState.waiting_for_new_name)
+    dp.register_message_handler(categories.handle_group_name, state=states.AddGroupState.waiting_for_new_name)
+    dp.register_message_handler(categories.handle_group_limit, state=states.AddGroupState.waiting_for_limit)
 
     dp.register_callback_query_handler(categories.prepare_category_management_menu, text_startswith=CallbackPrefixes.management_categories_for_groups_requested)
     dp.register_callback_query_handler(categories.add_new_group, text_startswith=CallbackPrefixes.management_groups_add_new_group)
     dp.register_callback_query_handler(categories.change_group_for_category, text_startswith=CallbackPrefixes.management_categories_move_to_another_group)
+
+    # Limits
+    dp.register_message_handler(categories.init_set_group_limit, RegexpCommandsFilter(regexp_commands=[r'set_limit_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.remove_group_limit, RegexpCommandsFilter(regexp_commands=[r'remove_limit_([0-9]*)']), state='*')
+    dp.register_message_handler(categories.update_group_limit, state=states.SetLimitState.waiting_for_amount)
 
     # Subscriptions
     dp.register_message_handler(subscriptions.prepare_subscription_management_menu, commands=['subscriptions'])

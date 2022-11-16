@@ -11,6 +11,9 @@ from finance_bot.models import Category, CategoryGroup
 cancel_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 cancel_kb.add(texts.button_cancel)
 
+done_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+done_kb.add(texts.button_done)
+
 
 async def get_top_category_options(amount: int) -> InlineKeyboardMarkup:
     categories = await db.get_top_categories()
