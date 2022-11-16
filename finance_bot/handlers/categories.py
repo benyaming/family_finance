@@ -54,6 +54,9 @@ def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
 
 
 def compose_limits(limits: list[Limit]) -> str:
+    if len(limits) == 0:
+        return texts.limits_no_found
+
     limits_rows = []
 
     for limit in limits:
