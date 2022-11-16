@@ -1,5 +1,6 @@
 import re
 from typing import List
+from datetime import datetime as dt
 
 import psycopg.errors
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, User
@@ -10,10 +11,19 @@ from finance_bot import db
 from finance_bot import texts
 from finance_bot.misc import bot
 from finance_bot import keyboards
-from finance_bot.models import Category, CategoryGroup
+from finance_bot.models import Category, CategoryGroup, Limit
+from finance_bot.settings import env
 from finance_bot.texts import StorageKeys
-from finance_bot.states import RenameCategoryState, AddCategoryState, AddGroupState, \
-    RenameGroupState
+from finance_bot.states import (
+    RenameCategoryState,
+    AddCategoryState,
+    AddGroupState,
+    RenameGroupState,
+    SetLimitState
+)
+
+
+separator = '\n-----------------------------------------------\n'
 
 
 def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
@@ -24,20 +34,49 @@ def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
                f'{texts.cat_manage_move_cat}: /move_cat_{category.id}' \
 
         categories_lines.append(line)
-    separator = '\n-----------------------------------------------\n'
+
     empty_case = f'{texts.cat_manage_group_is_empty} /remove_group_{group.id}'
+
     category_str = separator.join(categories_lines) if categories else empty_case
+
+    if group.limit:
+        limit_str = texts.limits_header.format(group.limit, env.CURRENCY_CHAR, group.id, group.id)
+    else:
+        limit_str = texts.limits_no_limit.format(group.id)
+
     resp = f'{texts.cat_manage_title} <b>{group.name}</b>:\n\n' \
+           f'{limit_str}\n\n' \
            f'{category_str}{separator}' \
            f'{texts.cat_manage_add_cat}: /new_cat_{group.id}\n' \
-           f'{texts.group_manage_edit_name}: /rename_group_{group.id}\n' \
+           f'{texts.group_manage_edit_name}: /rename_group_{group.id}\n'
 
     return resp
 
 
+def compose_limits(limits: list[Limit]) -> str:
+    limits_rows = []
+
+    for limit in limits:
+        if limit.usage_percentage < 70:
+            indicator = '🟢'
+        elif limit.usage_percentage < 100:
+            indicator = '🟡'
+        else:
+            indicator = '🔴'
+
+        row = f'{indicator} <b>{limit.group_name}</b>\n' \
+              f'{texts.limits_spent} {limit.spent}{env.CURRENCY_CHAR} / {limit.limit}{env.CURRENCY_CHAR} (<b>{limit.usage_percentage}%</b>)\n' \
+              f'{texts.limits_rest} {limit.rest if limit.rest > 0 else 0}{env.CURRENCY_CHAR}'
+        limits_rows.append(row)
+
+    rows = separator.join(limits_rows)
+
+    resp = f'{texts.limits_dt_header} {dt.now().isoformat(sep=" ", timespec="minutes")}\n\n{rows}'
+    return resp
+
+
 async def _update_last_group_menu(data: dict):
-    if StorageKeys.last_groups_menu_msg_id in data.keys():
-        msg_id = data[StorageKeys.last_groups_menu_msg_id]
+    if msg_id := data.get(StorageKeys.last_groups_menu_msg_id):
         groups = await db.get_category_groups(with_empty=True)
         kb = keyboards.get_category_group_options_for_management(groups)
         user_id = User.get_current().id
@@ -54,8 +93,7 @@ async def _update_last_group_menu(data: dict):
 
 async def _update_last_category_menu(data: dict, group: CategoryGroup):
     storage_data = data.get(StorageKeys.last_category_msg_id, {})
-    if group.id in storage_data.keys():
-        msg_id = storage_data[group.id]
+    if msg_id := storage_data.get(group.id):
         categories = await db.get_categories_for_group(group.id)
         resp = compose_categories(group, categories)
         user_id = User.get_current().id
@@ -175,10 +213,28 @@ async def add_category_name(msg: Message, state: FSMContext):
         await bot.edit_message_text(resp, chat_id=msg.chat.id, message_id=msg_id)
 
 
-async def add_group_name(msg: Message, state: FSMContext):
+async def handle_group_name(msg: Message, state: FSMContext):
     new_name = msg.text
+    await state.update_data({StorageKeys.new_group_group_name: new_name})
+    await AddGroupState.next()
+
+    await msg.reply(texts.limits_input_amount, reply_markup=keyboards.done_kb)
+
+
+async def handle_group_limit(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    new_name = data[StorageKeys.new_group_group_name]
+
+    if msg.text == texts.button_done:
+        limit = None
+    else:
+        try:
+            limit = int(msg.text)
+        except ValueError:
+            return await msg.reply(texts.limits_incorrect_amount)
+
     try:
-        await db.save_category_group(new_name)
+        await db.save_category_group(new_name, limit)
     except psycopg.errors.UniqueViolation:
         return await msg.answer(texts.msg_group_name_already_exists)
 
@@ -252,3 +308,52 @@ async def change_group_for_category(call: CallbackQuery, state: FSMContext):
         categories = await db.get_categories_for_group(group.id)
         resp = compose_categories(group, categories)
         await bot.edit_message_text(resp, chat_id=call.from_user.id, message_id=msg_id)
+
+
+async def init_set_group_limit(msg: Message, regexp_command: re.Match, state: FSMContext):
+    group_id = int(regexp_command.group(1))
+
+    try:
+        group = await db.get_category_group(group_id)
+    except TypeError:
+        return await msg.answer(texts.msg_group_not_found)
+
+    await state.update_data({StorageKeys.new_limit_group_id: group_id})
+    await SetLimitState.waiting_for_amount.set()
+    await msg.reply(texts.limits_update_amount.format(group.id), reply_markup=keyboards.cancel_kb)
+
+
+async def update_group_limit(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    group_id = data[StorageKeys.new_limit_group_id]
+
+    new_limit = int(msg.text)
+    await db.set_limit_for_category_group(group_id, new_limit)
+    await state.reset_state(with_data=False)
+    await msg.answer(
+        texts.limits_limit_set_success,
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    group = await db.get_category_group(group_id)
+    await _update_last_category_menu(await state.get_data(), group)
+
+
+async def remove_group_limit(msg: Message, regexp_command: re.Match, state: FSMContext):
+    group_id = int(regexp_command.group(1))
+
+    await db.set_limit_for_category_group(group_id, None)
+    await state.reset_state(with_data=False)
+    await msg.answer(
+        texts.limits_limit_set_success,
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    group = await db.get_category_group(group_id)
+    await _update_last_category_menu(await state.get_data(), group)
+
+
+async def get_limits_dashboard(msg: Message):
+    limits = await db.get_limits()
+    resp = compose_limits(limits)
+    await msg.reply(resp)

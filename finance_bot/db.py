@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import psycopg.errors
 
@@ -8,7 +8,8 @@ from finance_bot.models import (
     Transaction,
     Category,
     Subscription,
-    CategoryGroup
+    CategoryGroup,
+    Limit
 )
 
 
@@ -17,8 +18,9 @@ async def init_db():
     -- category_group table
     CREATE TABLE IF NOT EXISTS category_group
     (
-        id   SERIAL CONSTRAINT category_group_pk PRIMARY KEY,
-        name TEXT NOT NULL
+        id    SERIAL CONSTRAINT category_group_pk PRIMARY KEY,
+        name  TEXT NOT NULL,
+        monthly_limit INTEGER
     );
     
     CREATE UNIQUE INDEX IF NOT EXISTS category_group_id_uindex ON category_group (id);
@@ -60,6 +62,9 @@ async def init_db():
     CREATE UNIQUE INDEX IF NOT EXISTS subscription_id_uindex ON subscription(id);
     CREATE UNIQUE INDEX IF NOT EXISTS subscription_name_uindex ON subscription(name, category_id);
     
+    
+    -- Migration: add limits
+    ALTER TABLE category_group ADD COLUMN IF NOT EXISTS monthly_limit INTEGER;
     '''
     try:
         await dp['db_conn'].execute(query)
@@ -134,9 +139,10 @@ async def update_category(category: Category):
         raise
 
 
-async def save_category_group(group_name: str):
+async def save_category_group(group_name: str, limit: int):
+    query = 'INSERT INTO category_group (name, monthly_limit) VALUES (%s, %s)'
     try:
-        await dp['db_conn'].execute('INSERT INTO category_group (name) VALUES (%s)', (group_name,))
+        await dp['db_conn'].execute(query, (group_name, limit))
         await dp['db_conn'].commit()
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()
@@ -153,7 +159,7 @@ async def get_category_groups(with_empty: bool = False) -> List[CategoryGroup]:
         query = 'SELECT * FROM category_group ORDER BY id'
     async with dp['db_conn'].cursor() as acur:
         async for row in await acur.execute(query):
-            resp.append(CategoryGroup(id=row[0], name=row[1]))
+            resp.append(CategoryGroup(id=row[0], name=row[1], limit=row[2]))
     return resp
 
 
@@ -161,7 +167,7 @@ async def get_category_group(group_id: int) -> CategoryGroup:
     async with dp['db_conn'].cursor() as acur:
         await acur.execute('SELECT * FROM category_group WHERE id = %s', (group_id,))
         row = await acur.fetchone()
-    resp = CategoryGroup(id=row[0], name=row[1])
+    resp = CategoryGroup(id=row[0], name=row[1], limit=row[2])
     return resp
 
 
@@ -169,6 +175,16 @@ async def rename_category_group(group_id: int, new_name: str):
     query = 'UPDATE category_group SET name = %s WHERE id = %s'
     try:
         await dp['db_conn'].execute(query, (new_name, group_id))
+        await dp['db_conn'].commit()
+    except psycopg.errors.DatabaseError:
+        await dp['db_conn'].rollback()
+        raise
+
+
+async def set_limit_for_category_group(group_id: int, new_limit: Optional[int]):
+    query = 'UPDATE category_group SET monthly_limit = %s WHERE id = %s'
+    try:
+        await dp['db_conn'].execute(query, (new_limit, group_id))
         await dp['db_conn'].commit()
     except psycopg.errors.DatabaseError:
         await dp['db_conn'].rollback()
@@ -363,3 +379,74 @@ async def get_category_stats_for_month(
             names.append(row[0])
             amounts.append(row[1])
     return names, amounts
+
+
+async def get_limits() -> list[Limit]:
+    query = '''
+    WITH data AS (
+        SELECT cg.name,
+               cg.monthly_limit,
+               (sum(amount) / 10000)::INT AS total
+        FROM transaction t
+                 JOIN category c ON c.id = t.category_id
+                 JOIN category_group cg ON cg.id = c.group_id
+        WHERE
+            date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE) AND
+            date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE) AND
+            cg.monthly_limit IS NOT NULL
+        GROUP BY 1, 2
+        ORDER BY total DESC)
+    SELECT
+        data.* ,
+        data.monthly_limit - data.total AS rest,
+        ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
+    FROM data
+    '''
+
+    limits = []
+
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query):
+            limits.append(Limit(
+                group_name=row[0],
+                limit=row[1],
+                spent=row[2],
+                rest=row[3],
+                usage_percentage=row[4],
+            ))
+
+    return limits
+
+
+async def get_limit_for_group(group_id: int) -> Limit:
+    query = '''
+    WITH data AS (
+        SELECT cg.name,
+               cg.monthly_limit,
+               (sum(amount) / 10000)::INT AS total
+        FROM transaction t
+                 JOIN category c ON c.id = t.category_id
+                 JOIN category_group cg ON cg.id = c.group_id
+        WHERE
+            date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE) AND
+            date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE) AND
+            cg.id = %s
+        GROUP BY 1, 2
+        ORDER BY total DESC)
+    SELECT
+        data.* ,
+        data.monthly_limit - data.total AS rest,
+        ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
+    FROM data
+    '''
+
+    async with dp['db_conn'].cursor() as acur:
+        row = await (await acur.execute(query, (group_id,))).fetchone()
+
+    return Limit(
+        group_name=row[0],
+        limit=row[1],
+        spent=row[2],
+        rest=row[3],
+        usage_percentage=row[4],
+    )

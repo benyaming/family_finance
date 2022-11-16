@@ -43,9 +43,26 @@ async def create_transaction(call: CallbackQuery):
     transaction = Transaction(amount=amount, category_id=category_id)
     await db.save_transaction(transaction)
 
+    if group.limit:
+        limit = await db.get_limit_for_group(group.id)
+
+        if limit.usage_percentage < 70:
+            indicator = '🟢'
+        elif limit.usage_percentage < 100:
+            indicator = '🟡'
+        else:
+            indicator = '🔴'
+
+        group_str = f'\n{indicator} <b>{limit.group_name}</b>\n' \
+                    f'{texts.limits_spent} {limit.spent}{env.CURRENCY_CHAR} / ' \
+                    f'{limit.limit}{env.CURRENCY_CHAR} (<b>{limit.usage_percentage}%</b>)\n' \
+                    f'{texts.limits_rest} {limit.rest if limit.rest > 0 else 0}{env.CURRENCY_CHAR}\n\n'
+    else:
+        group_str = f'<b>{texts.transaction_manage_group}</b> {group.name}\n'
+
     msg_text = f'<i>{texts.transaction_manage_title}</i>\n\n' \
                f'<b>{texts.transaction_manage_summ}</b> {transaction.amount / env.AMOUNT_PRECISION:.2f}\n' \
                f'<b>{texts.transaction_manage_category}</b> {category.name}\n' \
-               f'<b>{texts.transaction_manage_group}</b> {group.name}\n' \
+               f'{group_str}' \
                f'<b>{texts.transaction_manage_date}</b> {transaction.created_at.strftime("%d/%m/%Y")}'
     await call.message.edit_text(msg_text)

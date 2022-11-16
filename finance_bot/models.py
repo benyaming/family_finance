@@ -15,6 +15,7 @@ class Category(BaseModel):
 class CategoryGroup(BaseModel):
     id: Optional[int]
     name: str
+    limit: Optional[int]
 
 
 class Transaction(BaseModel):
@@ -32,3 +33,11 @@ class Subscription(BaseModel):
     category_name: Optional[str]
     group_name: Optional[str]
     user_id: int
+
+
+class Limit(BaseModel):
+    group_name: str
+    limit: int
+    spent: int
+    rest: int
+    usage_percentage: int
