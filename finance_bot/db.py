@@ -8,7 +8,8 @@ from finance_bot.models import (
     Transaction,
     Category,
     Subscription,
-    CategoryGroup
+    CategoryGroup,
+    Limit
 )
 
 
@@ -378,3 +379,74 @@ async def get_category_stats_for_month(
             names.append(row[0])
             amounts.append(row[1])
     return names, amounts
+
+
+async def get_limits() -> list[Limit]:
+    query = '''
+    WITH data AS (
+        SELECT cg.name,
+               cg.monthly_limit,
+               (sum(amount) / 10000)::INT AS total
+        FROM transaction t
+                 JOIN category c ON c.id = t.category_id
+                 JOIN category_group cg ON cg.id = c.group_id
+        WHERE
+            date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE) AND
+            date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE) AND
+            cg.monthly_limit IS NOT NULL
+        GROUP BY 1, 2
+        ORDER BY total DESC)
+    SELECT
+        data.* ,
+        data.monthly_limit - data.total AS rest,
+        ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
+    FROM data
+    '''
+
+    limits = []
+
+    async with dp['db_conn'].cursor() as acur:
+        async for row in await acur.execute(query):
+            limits.append(Limit(
+                group_name=row[0],
+                limit=row[1],
+                spent=row[2],
+                rest=row[3],
+                usage_percentage=row[4],
+            ))
+
+    return limits
+
+
+async def get_limit_for_group(group_id: int) -> Limit:
+    query = '''
+    WITH data AS (
+        SELECT cg.name,
+               cg.monthly_limit,
+               (sum(amount) / 10000)::INT AS total
+        FROM transaction t
+                 JOIN category c ON c.id = t.category_id
+                 JOIN category_group cg ON cg.id = c.group_id
+        WHERE
+            date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE) AND
+            date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE) AND
+            cg.id = %s
+        GROUP BY 1, 2
+        ORDER BY total DESC)
+    SELECT
+        data.* ,
+        data.monthly_limit - data.total AS rest,
+        ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
+    FROM data
+    '''
+
+    async with dp['db_conn'].cursor() as acur:
+        row = await (await acur.execute(query, (group_id,))).fetchone()
+
+    return Limit(
+        group_name=row[0],
+        limit=row[1],
+        spent=row[2],
+        rest=row[3],
+        usage_percentage=row[4],
+    )

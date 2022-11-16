@@ -165,3 +165,6 @@ limits_update_amount = 'Введите новый размер лимита дл
 limits_limit_set_success = 'Лимит успешно задан!'
 limits_limit_remove_success = 'Лимит успешно удалён!'
 limits_incorrect_amount = 'Некорректное число. Введите число либо нажмите "Готово".'
+limits_spent = 'Потрачено:'
+limits_rest = 'Доступно:'
+limits_dt_header = 'Состояние лимитов на'

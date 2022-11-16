@@ -36,6 +36,7 @@ def register_handlers():
     dp.register_callback_query_handler(categories.change_group_for_category, text_startswith=CallbackPrefixes.management_categories_move_to_another_group)
 
     # Limits
+    dp.register_message_handler(categories.get_limits_dashboard, commands=['limits'], state='*')
     dp.register_message_handler(categories.init_set_group_limit, RegexpCommandsFilter(regexp_commands=[r'set_limit_([0-9]*)']), state='*')
     dp.register_message_handler(categories.remove_group_limit, RegexpCommandsFilter(regexp_commands=[r'remove_limit_([0-9]*)']), state='*')
     dp.register_message_handler(categories.update_group_limit, state=states.SetLimitState.waiting_for_amount)

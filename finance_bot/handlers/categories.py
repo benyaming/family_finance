@@ -1,5 +1,6 @@
 import re
 from typing import List
+from datetime import datetime as dt
 
 import psycopg.errors
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, User
@@ -10,7 +11,7 @@ from finance_bot import db
 from finance_bot import texts
 from finance_bot.misc import bot
 from finance_bot import keyboards
-from finance_bot.models import Category, CategoryGroup
+from finance_bot.models import Category, CategoryGroup, Limit
 from finance_bot.settings import env
 from finance_bot.texts import StorageKeys
 from finance_bot.states import (
@@ -22,6 +23,9 @@ from finance_bot.states import (
 )
 
 
+separator = '\n-----------------------------------------------\n'
+
+
 def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
     categories_lines = []
     for category in categories:
@@ -31,7 +35,6 @@ def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
 
         categories_lines.append(line)
 
-    separator = '\n-----------------------------------------------\n'
     empty_case = f'{texts.cat_manage_group_is_empty} /remove_group_{group.id}'
 
     category_str = separator.join(categories_lines) if categories else empty_case
@@ -47,6 +50,28 @@ def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
            f'{texts.cat_manage_add_cat}: /new_cat_{group.id}\n' \
            f'{texts.group_manage_edit_name}: /rename_group_{group.id}\n'
 
+    return resp
+
+
+def compose_limits(limits: list[Limit]) -> str:
+    limits_rows = []
+
+    for limit in limits:
+        if limit.usage_percentage < 70:
+            indicator = '🟢'
+        elif limit.usage_percentage < 100:
+            indicator = '🟡'
+        else:
+            indicator = '🔴'
+
+        row = f'{indicator} <b>{limit.group_name}</b>\n' \
+              f'{texts.limits_spent} {limit.spent}{env.CURRENCY_CHAR} / {limit.limit}{env.CURRENCY_CHAR} (<b>{limit.usage_percentage}%</b>)\n' \
+              f'{texts.limits_rest} {limit.rest if limit.rest > 0 else 0}{env.CURRENCY_CHAR}'
+        limits_rows.append(row)
+
+    rows = separator.join(limits_rows)
+
+    resp = f'{texts.limits_dt_header} {dt.now().isoformat(sep=" ", timespec="minutes")}\n\n{rows}'
     return resp
 
 
@@ -327,3 +352,8 @@ async def remove_group_limit(msg: Message, regexp_command: re.Match, state: FSMC
     group = await db.get_category_group(group_id)
     await _update_last_category_menu(await state.get_data(), group)
 
+
+async def get_limits_dashboard(msg: Message):
+    limits = await db.get_limits()
+    resp = compose_limits(limits)
+    await msg.reply(resp)
