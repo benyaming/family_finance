@@ -28,6 +28,7 @@ Also, it is only Russian language supported, but English is coming soon!
 - Stats for any month by category groups and categories
 - Daily notifications that reminds to enter spendings 
 - Subscriptions management (monthly payments with fixed amount)
+- Monthly limits for category groups
 
 ### Planned
 - Multi-language 
@@ -68,11 +69,11 @@ After amount was sent, the bot will ask user to select category from inline keyb
 Also, the bot supports some commands. Here are they:
 - `/categories` — Categories and Category groups management
 - `/stats` — Pie plot for current month. Also, can be used with explicit month `/stats month_number` or with explicit month and year `/stats month_number year` 
+- `/limits` — Show monthly limits dashboard for category groups with enabled limits
 
 <!-- CONTACT -->
 ## Contact
 
 * Telegram - [@benyomin](https://t.me/benyomin)  
-* [Email](mailto:benyomin.94@gmail.com)
 
 Project Link: [https://github.com/benyaming/family_finance](https://github.com/benyaming/family_finance)
