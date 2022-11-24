@@ -191,6 +191,5 @@ async def process_subscription(call: CallbackQuery):
     await bot.edit_message_text(
         text=resp,
         chat_id=call.from_user.id,
-        message_id=call.message.message_id,
-        reply_markup=ReplyKeyboardRemove()
+        message_id=call.message.message_id
     )
