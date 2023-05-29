@@ -170,6 +170,12 @@ async def remove_subscription(call: CallbackQuery):
     await db.remove_subscription(subscription_id)
     await bot.send_message(call.from_user.id, texts.sub_deleted)
 
+    await bot.edit_message_text(
+        text=call.message.text,
+        chat_id=call.from_user.id,
+        message_id=call.message.message_id
+    )
+
 
 async def process_subscription(call: CallbackQuery):
     await call.answer()
