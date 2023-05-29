@@ -144,8 +144,7 @@ async def create_subscription(call: CallbackQuery, state: FSMContext):
     await bot.edit_message_text(
         text=texts.new_sub_manage_done.format(subscription_name),
         chat_id=call.from_user.id,
-        message_id=call.message.message_id,
-        reply_markup=ReplyKeyboardRemove()
+        message_id=call.message.message_id
     )
 
 
