@@ -1,6 +1,5 @@
 import re
 from typing import List
-from datetime import datetime as dt
 
 import psycopg.errors
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, User
@@ -24,6 +23,16 @@ from finance_bot.states import (
 
 
 separator = '\n-----------------------------------------------\n'
+
+
+def get_limit_indicator(percentage: int, alt: bool = False) -> str:
+    if percentage < 80:
+        indicator = '✅' if alt else '🟢'
+    elif percentage < 100:
+        indicator = '⚠️' if alt else '🟡'
+    else:
+        indicator = '❗️' if alt else '🔴'
+    return indicator
 
 
 def compose_categories(group: CategoryGroup, categories: List[Category]) -> str:
@@ -57,24 +66,30 @@ def compose_limits(limits: list[Limit]) -> str:
     if len(limits) == 0:
         return texts.limits_no_found
 
+    total_limit = sum(limit.limit for limit in limits)
+    total_spent = sum(limit.spent for limit in limits)
+    total_percentage = int(total_spent / total_limit * 100)
+    total_indicator = get_limit_indicator(total_percentage, alt=True)
+
+    total_limit_k = total_limit // 1000
+    total_spent_k = total_spent // 1000
+
+    header = f'{total_indicator} <b>{texts.limits_total_state} ' \
+             f'{total_spent_k}k{env.CURRENCY_CHAR} / {total_limit_k}k{env.CURRENCY_CHAR} ' \
+             f'({total_percentage}%</b>)'
+
     limits_rows = []
 
     for limit in limits:
-        if limit.usage_percentage < 70:
-            indicator = '🟢'
-        elif limit.usage_percentage < 100:
-            indicator = '🟡'
-        else:
-            indicator = '🔴'
+        indicator = get_limit_indicator(limit.usage_percentage)
 
         row = f'{indicator} <b>{limit.group_name}</b>\n' \
               f'{texts.limits_spent} {limit.spent}{env.CURRENCY_CHAR} / {limit.limit}{env.CURRENCY_CHAR} (<b>{limit.usage_percentage}%</b>)\n' \
-              f'{texts.limits_rest} {limit.rest if limit.rest > 0 else 0}{env.CURRENCY_CHAR}'
+              f'{texts.limits_rest} {limit.rest}{env.CURRENCY_CHAR}'
         limits_rows.append(row)
 
     rows = separator.join(limits_rows)
-
-    resp = f'{texts.limits_dt_header} {dt.now().isoformat(sep=" ", timespec="minutes")}\n\n{rows}'
+    resp = f'{header}\n\n{rows}'
     return resp
 
 
