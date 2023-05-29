@@ -307,7 +307,7 @@ async def get_subscriptions_for_today() -> list[Subscription]:
         SELECT s.*, c.name, cg.name FROM subscription s
         JOIN category c on s.category_id = c.id
         JOIN category_group cg on c.group_id = cg.id
-        WHERE s.day_of_month = EXTRACT(DAY FROM CURRENT_TIMESTAMP)
+        WHERE s.day_of_month = EXTRACT(DAY FROM NOW())
         ORDER BY s.id
         '''
     async with dp['db_conn'].cursor() as acur:
