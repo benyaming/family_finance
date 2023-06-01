@@ -14,7 +14,7 @@ from finance_bot.handlers import register_handlers
 from finance_bot.db import init_db
 
 
-logging.basic_colorized_config(level=logging.INFO)
+logging.basic_colorized_config(level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 
