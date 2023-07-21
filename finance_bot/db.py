@@ -1,3 +1,5 @@
+import logging
+from datetime import date
 from typing import List, Tuple, Optional
 
 import psycopg.errors
@@ -302,16 +304,19 @@ async def remove_subscription(subscription_id: int):
 
 
 async def get_subscriptions_for_today() -> list[Subscription]:
+    day = date.today().day
+    logging.info(f'getting subscriptions for day {day}')
+
     resp = []
     query = '''
         SELECT s.*, c.name, cg.name FROM subscription s
         JOIN category c on s.category_id = c.id
         JOIN category_group cg on c.group_id = cg.id
-        WHERE s.day_of_month = EXTRACT(DAY FROM NOW())
+        WHERE s.day_of_month = %s
         ORDER BY s.id
         '''
     async with dp['db_conn'].cursor() as acur:
-        async for row in await acur.execute(query):
+        async for row in await acur.execute(query, (day,)):
             resp.append(Subscription(
                 id=row[0],
                 name=row[1],
