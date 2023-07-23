@@ -8,7 +8,7 @@ authors = ["Benyamin Ginzburg <benyomin.94@gmail.com>"]
 python = "^3.9"
 
 aiogram = '*'
-psycopg = {extras = ["c"],version = '*'}
+psycopg = '3.1.9'
 pydantic = {extras = ["dotenv"],version = '<2.0'}
 betterlogging = '*'
 apscheduler = '*'
