@@ -8,8 +8,8 @@ authors = ["Benyamin Ginzburg <benyomin.94@gmail.com>"]
 python = "^3.9"
 
 aiogram = '*'
-psycopg = {extras = ["binary"],version = '*'}
-pydantic = {extras = ["dotenv"],version = '*'}
+psycopg = {extras = ["c"],version = '*'}
+pydantic = {extras = ["dotenv"],version = '>2.0'}
 betterlogging = '*'
 apscheduler = '*'
 plotly = '*'
