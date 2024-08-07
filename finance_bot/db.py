@@ -86,6 +86,7 @@ async def get_top_categories(limit: int = env.CATEGORY_SUGGESTION_AMOUNT) -> Lis
     query = '''
     SELECT ca.* from transaction t
     JOIN category ca ON t.category_id = ca.id
+    WHERE EXTRACT(MONTH FROM t.created_at) = EXTRACT(MONTH FROM NOW())
     GROUP BY ca.id
     ORDER BY COUNT(t.id) DESC
     LIMIT %s
