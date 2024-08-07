@@ -383,25 +383,24 @@ async def get_category_stats_for_month(
 
 async def get_limits() -> list[Limit]:
     query = '''
-    WITH data AS (
-        SELECT cg.name,
-               cg.monthly_limit,
-               coalesce((sum(amount) / 10000)::INT, 0) AS total
-        FROM transaction t
-                 RIGHT JOIN category c ON c.id = t.category_id
-                 RIGHT JOIN category_group cg ON cg.id = c.group_id
-        WHERE
-            (date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE) AND
-            date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE) OR
-            t.created_at IS NULL) -- for including categories without transactions
-            AND cg.monthly_limit IS NOT NULL
-        GROUP BY 1, 2
-        ORDER BY total DESC)
-    SELECT
-        data.* ,
-        data.monthly_limit - data.total AS rest,
-        ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
-    FROM data
+        WITH data AS (
+            SELECT cg.name,
+                   cg.monthly_limit,
+                   coalesce((sum(amount) / 10000)::INT, 0) AS total
+            FROM category_group cg
+            LEFT JOIN category c ON cg.id = c.group_id
+            LEFT JOIN transaction t ON c.id = t.category_id
+            AND (date_part('month', t.created_at::TIMESTAMP) = extract(MONTH FROM CURRENT_DATE)
+            AND date_part('year', t.created_at::TIMESTAMP) = extract(YEAR FROM CURRENT_DATE))
+            WHERE cg.monthly_limit IS NOT NULL
+            GROUP BY cg.name, cg.monthly_limit
+            ORDER BY total DESC
+        )
+        SELECT
+            data.*,
+            data.monthly_limit - data.total AS rest,
+            ((data.total::FLOAT / data.monthly_limit::FLOAT) * 100)::INT AS percentage
+        FROM data;
     '''
 
     limits = []
