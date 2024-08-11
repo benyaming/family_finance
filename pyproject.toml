@@ -7,12 +7,12 @@ authors = ["Benyamin Ginzburg <benyomin.94@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 
-aiogram = '*'
+aiogram = '2.25.1'
 psycopg = {extras = ["binary"], version = '3.1.9'}
-pydantic = {extras = ["dotenv"], version = '*'}
-pydantic-settings = '*'
+pydantic = '2.8.2'
+pydantic-settings = '2.4.0'
 betterlogging = '*'
-apscheduler = '*'
+apscheduler = '3.10.4'
 plotly = '*'
 kaleido = '0.2.1'
 
