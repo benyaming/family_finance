@@ -338,7 +338,7 @@ async def init_set_group_limit(msg: Message, regexp_command: re.Match, state: FS
 
     await state.update_data({StorageKeys.new_limit_group_id: group_id})
     await SetLimitState.waiting_for_amount.set()
-    await msg.reply(texts.limits_update_amount.format(group.id), reply_markup=keyboards.cancel_kb)
+    await msg.reply(texts.limits_update_amount.format(group.name), reply_markup=keyboards.cancel_kb)
 
 
 async def update_group_limit(msg: Message, state: FSMContext):
