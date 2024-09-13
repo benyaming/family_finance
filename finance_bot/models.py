@@ -7,15 +7,15 @@ from pydantic import BaseModel, Field
 
 
 class Category(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = None
     name: str
     group_id: int
 
 
 class CategoryGroup(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = None
     name: str
-    limit: Optional[int]
+    limit: Optional[int] = None
 
 
 class Transaction(BaseModel):
@@ -25,13 +25,13 @@ class Transaction(BaseModel):
 
 
 class Subscription(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = None
     name: str
     amount: int
     day_of_month: int = Field(..., ge=1, le=31)
     category_id: int
-    category_name: Optional[str]
-    group_name: Optional[str]
+    category_name: Optional[str] = None
+    group_name: Optional[str] = None
     user_id: int
 
 
